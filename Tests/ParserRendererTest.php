@@ -5,6 +5,7 @@ namespace Thekwasti\WikiBundle\Tests;
 use Thekwasti\WikiBundle\Parser;
 use Thekwasti\WikiBundle\Renderer\XhtmlRenderer;
 use Thekwasti\WikiBundle\Renderer\LatexRenderer;
+use Thekwasti\WikiBundle\Renderer\DebugRenderer;
 
 class ParserRendererTest extends \PHPUnit_Framework_TestCase
 {
@@ -14,6 +15,11 @@ Lorem **ipsum** dolor sit amet, consetetur sadipscing elitr.
 Lorem //ipsum// dolor sit amet, consetetur sadipscing elitr.
 
 Lorem **//ipsum dolor//** sit amet, consetetur sadipscing elitr.
+
+
+
+
+
 
 == Headings 2
 |=First|=Second|
@@ -44,7 +50,9 @@ MU;
         $parser = new Parser($this->markup1);
         
         $renderer = new XhtmlRenderer();
-        $renderer->renderPre() . $renderer->render($parser->getTree()) . $renderer->renderPost();
+        
+        $renderer = new DebugRenderer();
+        echo "\n###\n" . $renderer->renderPre() . $renderer->render($parser->getTree()) . $renderer->renderPost() . "\n###\n";
         
         $renderer = new LatexRenderer();
         $latex = $renderer->renderPre() . $renderer->render($parser->getTree()) . $renderer->renderPost();
