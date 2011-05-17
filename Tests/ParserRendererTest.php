@@ -47,8 +47,6 @@ MU;
     
     public function test()
     {
-        $start = microtime(true);
-        
         $parser = new Parser($this->markup3);
         $parser = new Parser($this->markup2);
         $parser = new Parser($this->markup1);
@@ -57,12 +55,9 @@ MU;
         $renderer->render($parser->getDocument());
         
         $renderer = new XhtmlRenderer();
-        echo "\n###\n" . $renderer->render($parser->getDocument()) . "\n###\n";
+        $renderer->render($parser->getDocument());
         
         $renderer = new LatexRenderer();
-        $latex = $renderer->render($parser->getDocument());
-        file_put_contents('/tmp/latex.tex', $latex);
-        
-        printf('%.3f ms', (microtime(true) - $start) * 1000.0);
+        $renderer->render($parser->getDocument());
     }
 }
