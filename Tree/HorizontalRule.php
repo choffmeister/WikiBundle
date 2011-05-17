@@ -2,6 +2,6 @@
 
 namespace Thekwasti\WikiBundle\Tree;
 
-class HorizontalRule implements NodeInterface
+class HorizontalRule extends Leaf
 {
 }

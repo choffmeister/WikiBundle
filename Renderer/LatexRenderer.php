@@ -2,6 +2,8 @@
 
 namespace Thekwasti\WikiBundle\Renderer;
 
+use Thekwasti\WikiBundle\Tree\Document;
+
 use Thekwasti\WikiBundle\Tree\HorizontalRule;
 use Thekwasti\WikiBundle\Tree\Link;
 use Thekwasti\WikiBundle\Tree\Italic;
@@ -14,20 +16,36 @@ use Thekwasti\WikiBundle\Tree\Text;
 
 class LatexRenderer implements RendererInterface
 {
-    public function render(NodeInterface $element)
+    protected $documentPre = <<<EOF
+\documentclass[a4paper, 10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\geometry{a4paper,left=25mm,right=25mm,top=25mm,bottom=25mm}
+\pagestyle{myheadings}
+\markright{Document}
+\begin{document}
+EOF;
+
+    protected $documentPost = <<<EOF
+\end{document}
+EOF;
+    
+    public function render($element)
     {
-        if ($element instanceof Chain) {
+        if (is_array($element)) {
             $result = '';
             
-            foreach ($element->getElements() as $subElement) {
+            foreach ($element as $subElement) {
                 $result .= $this->render($subElement);
             }
-            
+
             return $result;
+        } else if ($element instanceof Document) {
+            return $this->documentPre . $this->render($element->getChildren()) . $this->documentPost;
         } else if ($element instanceof Text) {
             return $element->getText();
         } else if ($element instanceof EmptyLine) {
-            return "\n\\\\\n";
+            return "";//\n\\\\\n";
         } else if ($element instanceof HorizontalRule) {
             return "\n\\begin{center}\\rule{0.5\\textwidth}{0.5pt}\\end{center}\n";
         } else if ($element instanceof Headline) {
@@ -36,31 +54,16 @@ class LatexRenderer implements RendererInterface
             
             return sprintf("\\%ssection{%s}\n",
                 str_repeat('sub', $level),
-                $this->render($element->getContent())
+                $this->render($element->getChildren())
             );
         } else if ($element instanceof Bold) {
-            return sprintf('\textbf{%s}', $this->render($element->getContent()));
+            return sprintf('\textbf{%s}', $this->render($element->getChildren()));
         } else if ($element instanceof Italic) {
-            return sprintf('\textit{%s}', $this->render($element->getContent()));
+            return sprintf('\textit{%s}', $this->render($element->getChildren()));
         } else if ($element instanceof Link) {
-            return sprintf('%s\footnote{%s}', $this->render($element->getContent()), $element->getDestination());
+            return sprintf('%s\footnote{%s}', $this->render($element->getChildren()), $element->getDestination());
         } else {
-            return '';
+            throw new Exception();
         }
-    }
-    
-    public function renderPre()
-    {
-        return <<<EOF
-\documentclass{article}
-\begin{document}
-EOF;
-    }
-    
-    public function renderPost()
-    {
-        return <<<EOF
-\end{document}
-EOF;
     }
 }

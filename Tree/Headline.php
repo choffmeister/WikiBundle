@@ -2,20 +2,15 @@
 
 namespace Thekwasti\WikiBundle\Tree;
 
-class Headline implements NodeInterface
+class Headline extends Node
 {
-    private $content;
     private $level;
     
-    public function __construct(NodeInterface $content, $level = 1)
+    public function __construct($level = 1, $children)
     {
-        $this->content = $content;
         $this->level = $level;
-    }
-    
-    public function getContent()
-    {
-        return $this->content;
+        
+        parent::__construct($children);
     }
     
     public function getLevel()

@@ -2,24 +2,19 @@
 
 namespace Thekwasti\WikiBundle\Tree;
 
-class Link implements NodeInterface
+class Link extends Node
 {
     private $destination;
-    private $content;
     
-    public function __construct($destination, NodeInterface $content = null)
+    public function __construct($destination, $children)
     {
         $this->destination = trim($destination);
-        $this->content = $content;
+        
+        parent::__construct($children);
     }
     
     public function getDestination()
     {
         return $this->destination;
-    }
-    
-    public function getContent()
-    {
-        return $this->content ?: new Text($this->destination);
     }
 }

@@ -2,6 +2,6 @@
 
 namespace Thekwasti\WikiBundle\Tree;
 
-class Bold extends Node
+class Document extends Node
 {
 }

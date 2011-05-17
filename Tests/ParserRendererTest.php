@@ -10,12 +10,13 @@ use Thekwasti\WikiBundle\Renderer\DebugRenderer;
 class ParserRendererTest extends \PHPUnit_Framework_TestCase
 {
     private $markup1 = <<<MU
+
+    
 = Headings 1 //top//
 Lorem **ipsum** dolor sit amet, consetetur sadipscing elitr.
 Lorem //ipsum// dolor sit amet, consetetur sadipscing elitr.
 
 Lorem **//ipsum dolor//** sit amet, consetetur sadipscing elitr.
-
 
 
 
@@ -37,6 +38,7 @@ asdsad
 ------
 asdsad
 
+
 MU;
 
     private $markup2 = 'Pre **//bOlD//** post [[link]] [[link|to]]';
@@ -45,18 +47,22 @@ MU;
     
     public function test()
     {
+        $start = microtime(true);
+        
         $parser = new Parser($this->markup3);
         $parser = new Parser($this->markup2);
         $parser = new Parser($this->markup1);
         
-        $renderer = new XhtmlRenderer();
-        
         $renderer = new DebugRenderer();
-        echo "\n###\n" . $renderer->renderPre() . $renderer->render($parser->getTree()) . $renderer->renderPost() . "\n###\n";
+        $renderer->render($parser->getDocument());
+        
+        $renderer = new XhtmlRenderer();
+        echo "\n###\n" . $renderer->render($parser->getDocument()) . "\n###\n";
         
         $renderer = new LatexRenderer();
-        $latex = $renderer->renderPre() . $renderer->render($parser->getTree()) . $renderer->renderPost();
-        
+        $latex = $renderer->render($parser->getDocument());
         file_put_contents('/tmp/latex.tex', $latex);
+        
+        printf('%.3f ms', (microtime(true) - $start) * 1000.0);
     }
 }

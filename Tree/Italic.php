@@ -2,17 +2,6 @@
 
 namespace Thekwasti\WikiBundle\Tree;
 
-class Italic implements NodeInterface
+class Italic extends Node
 {
-    private $content;
-    
-    public function __construct(NodeInterface $content)
-    {
-        $this->content = $content;
-    }
-    
-    public function getContent()
-    {
-        return $this->content;
-    }
 }

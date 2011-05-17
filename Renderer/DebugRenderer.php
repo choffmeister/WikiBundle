@@ -14,47 +14,25 @@ use Thekwasti\WikiBundle\Tree\Text;
 
 class DebugRenderer implements RendererInterface
 {
-    public function render(NodeInterface $element)
+    public function render($element)
     {
         return $this->renderRecursion($element);
     }
     
-    private function renderRecursion(NodeInterface $element, $depth = 0)
+    private function renderRecursion($element, $depth = 0)
     {
-        if ($element instanceof Chain) {
-            $result = str_repeat('    ', $depth) . "Chain\n";
+        if (is_array($element)) {
+            $result = '';
             
-            foreach ($element->getElements() as $subElement) {
-                $result .= $this->renderRecursion($subElement, $depth + 1);
+            foreach ($element as $subElement) {
+                $result .= $this->renderRecursion($subElement, $depth);
             }
             
             return $result;
-        } else if ($element instanceof Text) {
-            return str_repeat('    ', $depth) . "Text\n";
-        } else if ($element instanceof EmptyLine) {
-            return str_repeat('    ', $depth) . "EmptyLine\n";
-        } else if ($element instanceof HorizontalRule) {
-            return str_repeat('    ', $depth) . "HorizontalRule\n";
-        } else if ($element instanceof Headline) {
-            return str_repeat('    ', $depth) . "Headline\n" . $this->renderRecursion($element->getContent(), $depth + 1);
-        } else if ($element instanceof Bold) {
-            return str_repeat('    ', $depth) . "Bold\n" . $this->renderRecursion($element->getContent(), $depth + 1);
-        } else if ($element instanceof Italic) {
-            return str_repeat('    ', $depth) . "Italic\n" . $this->renderRecursion($element->getContent(), $depth + 1);
-        } else if ($element instanceof Link) {
-            return str_repeat('    ', $depth) . "Link\n" . $this->renderRecursion($element->getContent(), $depth + 1);
+        } else if ($element instanceof NodeInterface) {
+            return str_repeat('    ', $depth) . get_class($element) . "\n" . $this->renderRecursion($element->getChildren(), $depth + 1);
         } else {
-            return '';
+            throw new Exception();
         }
-    }
-    
-    public function renderPre()
-    {
-        return '';
-    }
-    
-    public function renderPost()
-    {
-        return '';
     }
 }

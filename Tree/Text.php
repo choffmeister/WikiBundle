@@ -2,7 +2,7 @@
 
 namespace Thekwasti\WikiBundle\Tree;
 
-class Text implements NodeInterface
+class Text extends Leaf
 {
     private $text;
     
@@ -13,6 +13,8 @@ class Text implements NodeInterface
         }
         
         $this->text = $text;
+        
+        parent::__construct();
     }
 
     public function getText()

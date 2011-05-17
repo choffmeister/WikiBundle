@@ -2,8 +2,8 @@
 
 namespace Thekwasti\WikiBundle;
 
+use Thekwasti\WikiBundle\Tree\Document;
 use Thekwasti\WikiBundle\Tree\NodeInterface;
-
 use Thekwasti\WikiBundle\Tree\HorizontalRule;
 use Thekwasti\WikiBundle\Tree\Headline;
 use Thekwasti\WikiBundle\Tree\EmptyLine;
@@ -16,7 +16,7 @@ use Thekwasti\WikiBundle\Tree\Link;
 final class Parser
 {
     private $markup;
-    private $tree;
+    private $document;
     
     public function __construct($markup)
     {
@@ -26,19 +26,22 @@ final class Parser
         
         $markup = str_replace("\r\n", "\n", $markup);
         $lines = explode("\n", $markup);
-        $this->tree = new Chain();
+        $this->tree = new Document();
         
+        $children = array();
         foreach ($lines as $line) {
-            $this->tree->addElement($this->parseLine($line));
+            $children[] = $this->parseLine($line);
         }
+        
+        $this->document = new Document($children);
     }
-    
+        
     private function parseLine($line)
     {
-        if ($line === '') {
+        if (trim($line) === '') {
             return new EmptyLine();
         } else if (preg_match('/^(=+)(.+)$/', $line, $match)) {
-            return new Headline($this->parseText($match[2]), strlen($match[1]));
+            return new Headline(strlen($match[1]), $this->parseText($match[2]));
         } else if (preg_match('/^\-{4,}$/', $line, $match)) {
             return new HorizontalRule();
         } else {
@@ -61,7 +64,7 @@ final class Parser
             
             if (count($split) == 1) {
                 return $this->splitText($text, $match[0][1], strlen($match[0][0]),
-                    new Link($split[0])
+                    new Link($split[0], new Text($split[0]))
                 );
             } else {
                 return $this->splitText($text, $match[0][1], strlen($match[0][0]),
@@ -84,24 +87,24 @@ final class Parser
             return $token;
         }
         
-        $result = new Chain();
+        $result = array();
         
         if ($hasPre) {
-            $result->addElement($this->parseText(substr($text, 0, $i)));
+            $result[] = $this->parseText(substr($text, 0, $i));
         }
         
-        $result->addElement($token);
+        $result[] = $token;
         
         if ($hasPost) {
-            $result->addElement($this->parseText(substr($text, $i + $j)));
+            $result[] = $this->parseText(substr($text, $i + $j));
         }
         
         return $result;
     }
     
-    public function getTree()
+    public function getDocument()
     {
-        return $this->tree;
+        return $this->document;
     }
 }
 

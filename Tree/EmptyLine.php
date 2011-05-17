@@ -2,6 +2,6 @@
 
 namespace Thekwasti\WikiBundle\Tree;
 
-class EmptyLine implements NodeInterface
+class EmptyLine extends Leaf
 {
 }

@@ -6,7 +6,12 @@ use Thekwasti\WikiBundle\Tree\NodeInterface;
 
 interface RendererInterface
 {
-    function render(NodeInterface $element);
-    function renderPre();
-    function renderPost();
+    /**
+     * Renders a single element or an array of elements.
+     * 
+     * @param NodeInterface|array $element An NodeInterface or an array of NodeInterface objects
+     * 
+     * @return string The rendered string
+     */
+    function render($element);
 }

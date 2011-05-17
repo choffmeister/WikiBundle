@@ -2,6 +2,8 @@
 
 namespace Thekwasti\WikiBundle\Renderer;
 
+use Thekwasti\WikiBundle\Tree\Document;
+
 use Thekwasti\WikiBundle\Tree\HorizontalRule;
 use Thekwasti\WikiBundle\Tree\Link;
 use Thekwasti\WikiBundle\Tree\Italic;
@@ -14,16 +16,18 @@ use Thekwasti\WikiBundle\Tree\Text;
 
 class XhtmlRenderer implements RendererInterface
 {
-    public function render(NodeInterface $element)
+    public function render($element)
     {
-        if ($element instanceof Chain) {
+        if (is_array($element)) {
             $result = '';
             
-            foreach ($element->getElements() as $subElement) {
+            foreach ($element as $subElement) {
                 $result .= $this->render($subElement);
             }
             
             return $result;
+        } else if ($element instanceof Document) {
+            return $this->render($element->getChildren());
         } else if ($element instanceof Text) {
             return $element->getText();
         } else if ($element instanceof EmptyLine) {
@@ -33,27 +37,17 @@ class XhtmlRenderer implements RendererInterface
         } else if ($element instanceof Headline) {
             return sprintf("<h%d>%s</h%d>\n",
                 $element->getLevel(),
-                $this->render($element->getContent()),
+                $this->render($element->getChildren()),
                 $element->getLevel()
             );
         } else if ($element instanceof Bold) {
-            return sprintf('<strong>%s</strong>', $this->render($element->getContent()));
+            return sprintf('<strong>%s</strong>', $this->render($element->getChildren()));
         } else if ($element instanceof Italic) {
-            return sprintf('<em>%s</em>', $this->render($element->getContent()));
+            return sprintf('<em>%s</em>', $this->render($element->getChildren()));
         } else if ($element instanceof Link) {
-            return sprintf('<a href="%s">%s</a>', $element->getDestination(), $this->render($element->getContent()));
+            return sprintf('<a href="%s">%s</a>', $element->getDestination(), $this->render($element->getChildren()));
         } else {
-            return '';
+            throw new Exception();
         }
-    }
-    
-    public function renderPre()
-    {
-        return '';
-    }
-    
-    public function renderPost()
-    {
-        return '';
     }
 }
