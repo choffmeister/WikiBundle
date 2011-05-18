@@ -8,6 +8,11 @@ class Leaf implements NodeInterface
     {
     }
     
+    public function addChild(NodeInterface $child)
+    {
+        throw new \LogicException();
+    }
+    
     public function getChildren()
     {
         return array();

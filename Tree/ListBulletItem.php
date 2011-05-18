@@ -6,11 +6,16 @@ class ListBulletItem extends Node
 {
     private $level;
     
-    public function __construct($level = 1, $children)
+    public function __construct($level = 1, $children = array())
     {
         $this->level = $level;
         
         parent::__construct($children);
+    }
+    
+    public function setLevel($level)
+    {
+        $this->level = $level;
     }
     
     public function getLevel()

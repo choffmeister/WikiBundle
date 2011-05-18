@@ -21,6 +21,15 @@ class Node implements NodeInterface
         $this->children = $children;
     }
     
+    public function addChild(NodeInterface $child)
+    {
+        if (!$child instanceof NodeInterface) {
+            throw new \InvalidArgumentException(sprintf('$child must be an NodeInterface object. Found an %s element', gettype($child) == 'object' ? get_class($child) : gettype($child)));
+        }
+            
+        $this->children[] = $child;
+    }
+    
     public function getChildren()
     {
         return $this->children;

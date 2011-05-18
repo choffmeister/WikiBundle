@@ -17,6 +17,11 @@ class Text extends Leaf
         parent::__construct();
     }
 
+    public function setText($text)
+    {
+        $this->text = $text;
+    }
+    
     public function getText()
     {
         return $this->text;
