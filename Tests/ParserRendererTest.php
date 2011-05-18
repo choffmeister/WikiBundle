@@ -17,10 +17,10 @@ class ParserRendererTest extends \PHPUnit_Framework_TestCase
         $doc = $parser->parse($this->markup1);
         
         $renderer = new DebugRenderer();
-        $debig = $renderer->render($doc);
+        echo $debug = $renderer->render($doc);
         
         $renderer = new XhtmlRenderer();
-        $xhtml = $renderer->render($doc);
+        echo $xhtml = $renderer->render($doc);
         
         $renderer = new LatexRenderer();
         $latex = $renderer->render($doc);
@@ -36,6 +36,12 @@ Lorem //ipsum// dolor sit amet, consetetur sadipscing elitr.
 Lorem **//ipsum dolor//** sit amet, consetetur sadipscing elitr.
 Lorem ipsum dolor sit amet, consetetur sadipscing elitr. Lorem ipsum dolor sit amet, consetetur sadipscing elitr. Lorem ipsum dolor sit amet, consetetur sadipscing elitr. Lorem ipsum dolor sit amet, consetetur sadipscing elitr. Lorem ipsum dolor sit amet, consetetur sadipscing elitr.
 
+{{{ ** fold ** }}}
+
+{{{
+no
+ = WIKI
+}}}
 
 * asdasd
 * asd
@@ -53,7 +59,7 @@ Lorem ipsum dolor sit amet, consetetur sadipscing elitr. Lorem ipsum dolor sit a
 
 === Headings 3
 Click [[mypage]] to watch me!
-Click [[http://www.youtube.com | Youtube]] to watch videos!
+Click [[http://www.youtube.com// | You//tube//]] to watch videos!
 
 === ASDASD
 [[asdasd]]=== HALLO

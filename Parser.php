@@ -2,6 +2,8 @@
 
 namespace Thekwasti\WikiBundle;
 
+use Thekwasti\WikiBundle\Tree\NoWiki;
+use Thekwasti\WikiBundle\Tree\Link;
 use Thekwasti\WikiBundle\Tree\HorizontalRule;
 use Thekwasti\WikiBundle\Tree\Bold;
 use Thekwasti\WikiBundle\Tree\Italic;
@@ -26,72 +28,92 @@ class Parser
     
     public function parse($markup)
     {
-        $this->i = 0;
-        $this->tokens = $this->lexer->lex($markup);
-        return $this->recursion('Document');
-    }
-    
-    private function recursion($current, $closeToken = null)
-    {
-        $children = array();
+        $tokens = $this->lexer->lex($markup);
         
-        while ($this->i < count($this->tokens)) {
-            $token = $this->tokens[$this->i];
+        $doc = new Document();
+        $stack = new Stack();
+        $stack->push(array($doc, 'root', null));
+        
+        for ($i = 0; $i < count($tokens); $i++) {
+            $current = $stack->peek();
+            
+            $node = $current[0];
+            $state = $current[1];
+            $closer = $current[2];
+            
+            $token = $tokens[$i];
             $type = $token['type'];
             $value = $token['value'];
             
-            if ($closeToken == $token['type']) {
-                $this->i++;
-                break;
+            if ($closer !== null && $type == $closer) {
+                $stack->pop();
             }
             
-            if ($type == Lexer::T_NEWLINE) {
-                $this->i++;
-                $children[] = new EmptyLine();
+            else if ($state == 'noparse') {
+                $node->addChild(new Text($value));
             }
             
-            else if ($current == 'Document' && $type == Lexer::T_HEADLINE) {
-                $this->i++;
-                $children[] = new Headline(1, $this->recursion('', Lexer::T_NEWLINE));
+            else if ($state == 'linkdestination') {
+                if ($type == Lexer::T_LINK_DELIM) {
+                    $stack->pop();
+                    $stack->push(array($node, 'inline', $closer));
+                } else {
+                    $node->setDestination($node->getDestination() . $value);
+                }
             }
             
-            else if ($current == 'Document' && $type == Lexer::T_HORIZONTAL_RULE) {
-                $this->i++;
-                $children[] = new HorizontalRule();
+            else if ($state == 'root' && $type >= Lexer::T_HEADLINE_1 && $type <= Lexer::T_HEADLINE_6) {
+                $headline = new Headline($type - Lexer::T_HEADLINE_1 + 1);
+                $node->addChild($headline);
+                $stack->push(array($headline, 'inline', Lexer::T_NEWLINE));
             }
             
-            else if ($current == 'Document' && $type == Lexer::T_LIST_BULLET_ITEM) {
-                $this->i++;
-                $children[] = new ListBulletItem(1, $this->recursion('', Lexer::T_NEWLINE));
+            else if ($state == 'root' && $type == Lexer::T_HORIZONTAL_RULE) {
+                $node->addChild(new HorizontalRule());
             }
             
-            else if ($current == 'Document' && $type == Lexer::T_LIST_SHARP_ITEM) {
-                $this->i++;
-                $children[] = new ListSharpItem(1, $this->recursion('', Lexer::T_NEWLINE));
+            else if ($state == 'root' && $type >= Lexer::T_LIST_BULLET_ITEM_1 && $type <= Lexer::T_LIST_BULLET_ITEM_3) {
+                $listBulletItem = new ListBulletItem($type - Lexer::T_LIST_BULLET_ITEM_1 + 1);
+                $node->addChild($listBulletItem);
+                $stack->push(array($listBulletItem, 'inline', Lexer::T_NEWLINE));
+            }
+            
+            else if ($state == 'root' && $type >= Lexer::T_LIST_SHARP_ITEM_1 && $type <= Lexer::T_LIST_SHARP_ITEM_3) {
+                $listSharpItem = new ListSharpItem($type - Lexer::T_LIST_SHARP_ITEM_1 + 1);
+                $node->addChild($listSharpItem);
+                $stack->push(array($listSharpItem, 'inline', Lexer::T_NEWLINE));
             }
             
             else if ($type == Lexer::T_BOLD) {
-                $this->i++;
-                $children[] = new Bold($this->recursion('', Lexer::T_BOLD));
+                $bold = new Bold();
+                $node->addChild($bold);
+                $stack->push(array($bold, 'inline', Lexer::T_BOLD));
             }
             
             else if ($type == Lexer::T_ITALIC) {
-                $this->i++;
-                $children[] = new Italic($this->recursion('', Lexer::T_ITALIC));
+                $italic = new Italic();
+                $node->addChild($italic);
+                $stack->push(array($italic, 'inline', Lexer::T_ITALIC));
+            }
+            
+            else if ($type == Lexer::T_NOWIKI_OPEN) {
+                $nowiki = new NoWiki();
+                $node->addChild($nowiki);
+                $stack->push(array($nowiki, 'noparse', Lexer::T_NOWIKI_CLOSE));
+            }
+            
+            else if ($type == Lexer::T_LINK_OPEN) {
+                $link = new Link('');
+                $node->addChild($link);
+                $stack->push(array($link, 'linkdestination', Lexer::T_LINK_CLOSE));
             }
             
             else {
-                $this->i++;
-                $children[] = new Text($value);
+                $node->addChild(new Text($value));
             }
         }
         
-        if ($current === '') {
-            return $children;
-        }
-        
-        $class = '\\Thekwasti\\WikiBundle\\Tree\\' . $current;
-        return new $class($children);
+        return $doc;
     }
 }
 

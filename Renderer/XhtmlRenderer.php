@@ -2,6 +2,7 @@
 
 namespace Thekwasti\WikiBundle\Renderer;
 
+use Thekwasti\WikiBundle\Tree\NoWiki;
 use Thekwasti\WikiBundle\Tree\ListSharpItem;
 use Thekwasti\WikiBundle\Tree\ListBulletItem;
 use Thekwasti\WikiBundle\Tree\Document;
@@ -28,6 +29,8 @@ class XhtmlRenderer implements RendererInterface
             
             return $result;
         } else if ($element instanceof Document) {
+            return $this->render($element->getChildren());
+        } else if ($element instanceof NoWiki) {
             return $this->render($element->getChildren());
         } else if ($element instanceof Text) {
             return $element->getText();

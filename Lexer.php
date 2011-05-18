@@ -6,25 +6,40 @@ class Lexer
 {
     const T_TEXT = 1;
     const T_NEWLINE = 10;
-    const T_HEADLINE = 51;
-    const T_HORIZONTAL_RULE = 52;
+    const T_HEADLINE_1 = 51;
+    const T_HEADLINE_2 = 52;
+    const T_HEADLINE_3 = 53;
+    const T_HEADLINE_4 = 54;
+    const T_HEADLINE_5 = 55;
+    const T_HEADLINE_6 = 56;
+    const T_HORIZONTAL_RULE = 61;
     const T_BOLD = 101;
     const T_ITALIC = 102;
     const T_LINK_OPEN = 111;
     const T_LINK_CLOSE = 112;
-    const T_LIST_BULLET_ITEM = 121;
-    const T_LIST_SHARP_ITEM = 122;
+    const T_LINK_DELIM = 113;
+    const T_LIST_BULLET_ITEM_1 = 121;
+    const T_LIST_BULLET_ITEM_2 = 121;
+    const T_LIST_BULLET_ITEM_3 = 123;
+    const T_LIST_SHARP_ITEM_1 = 131;
+    const T_LIST_SHARP_ITEM_2 = 132;
+    const T_LIST_SHARP_ITEM_3 = 133;
+    const T_NOWIKI_OPEN = 1001;
+    const T_NOWIKI_CLOSE = 1002;
     
     private $patterns = array(
         "\n",
         '^=+',
         '^\*+',
         '^\#+',
-        '^-{4,}',
+        '^\-{4,}',
         '\*\*',
         '//',
         '\[\[',
-        '\]\]'
+        '\]\]',
+        '\|',
+        '\{\{\{',
+        '\}\}\}',
     );
     
     public function lex($markup)
@@ -62,17 +77,33 @@ class Lexer
         if ($value == "\n") {
             return self::T_NEWLINE;
         } else if ($isLineBeginning && $value[0] == '=') {
-            return self::T_HEADLINE;
+            $level = strlen(trim($value));
+            if ($level > 6) $level = 6; 
+            return self::T_HEADLINE_1 + $level - 1;
         } else if ($isLineBeginning && $value[0] == '*') {
-            return self::T_LIST_BULLET_ITEM;
+            $level = strlen(trim($value));
+            if ($level > 3) $level = 3; 
+            return self::T_LIST_BULLET_ITEM_1 + $level - 1;
         } else if ($isLineBeginning && $value[0] == '#') {
-            return self::T_LIST_SHARP_ITEM;
+            $level = strlen(trim($value));
+            if ($level > 3) $level = 3; 
+            return self::T_LIST_SHARP_ITEM_1 + $level - 1;
         } else if ($isLineBeginning && strlen($value) >= 4 && substr($value, 0, 4) == '----') {
             return self::T_HORIZONTAL_RULE;
         } else if ($value == '**') {
             return self::T_BOLD;
         } else if ($value == '//') {
             return self::T_ITALIC;
+        } else if ($value == '[[') {
+            return self::T_LINK_OPEN;
+        } else if ($value == ']]') {
+            return self::T_LINK_CLOSE;
+        } else if ($value == '|') {
+            return self::T_LINK_DELIM;
+        } else if ($value == '{{{') {
+            return self::T_NOWIKI_OPEN;
+        } else if ($value == '}}}') {
+            return self::T_NOWIKI_CLOSE;
         }
         
         return self::T_TEXT;
