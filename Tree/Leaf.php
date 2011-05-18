@@ -18,6 +18,11 @@ class Leaf implements NodeInterface
         return array();
     }
     
+    public function setChildren($children)
+    {
+        throw new \LogicException();
+    }
+    
     public function serialize()
     {
         return '';
