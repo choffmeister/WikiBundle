@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    
+    <parameters>
+    	<parameter key="thekwasti_wiki.renderer.xhtml.class">Thekwasti\WikiBundle\Renderer\XhtmlRenderer</parameter>
+    	<parameter key="thekwasti_wiki.renderer.latex.class">Thekwasti\WikiBundle\Renderer\LatexRenderer</parameter>
+    </parameters>
+
+    <services>
+        <service id="thekwasti_wiki.twig_extension" class="Thekwasti\WikiBundle\Twig\Extension\WikiExtension" public="false">
+            <tag name="twig.extension" />
+            <argument type="service" id="service_container" />
+            <argument type="collection">
+            	<argument key="Xhtml" type="service" id="thekwasti_wiki.renderer.xhtml" />
+            	<argument key="Latex" type="service" id="thekwasti_wiki.renderer.latex" />
+            </argument>
+        </service>
+        
+        <service id="thekwasti_wiki.renderer.xhtml" class="%thekwasti_wiki.renderer.xhtml.class%" />
+        <service id="thekwasti_wiki.renderer.latex" class="%thekwasti_wiki.renderer.latex.class%" />
+    </services>
+</container>
