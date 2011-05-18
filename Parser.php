@@ -2,109 +2,98 @@
 
 namespace Thekwasti\WikiBundle;
 
-use Thekwasti\WikiBundle\Tree\Document;
-use Thekwasti\WikiBundle\Tree\NodeInterface;
 use Thekwasti\WikiBundle\Tree\HorizontalRule;
-use Thekwasti\WikiBundle\Tree\Headline;
-use Thekwasti\WikiBundle\Tree\EmptyLine;
-use Thekwasti\WikiBundle\Tree\Chain;
-use Thekwasti\WikiBundle\Tree\Text;
 use Thekwasti\WikiBundle\Tree\Bold;
 use Thekwasti\WikiBundle\Tree\Italic;
-use Thekwasti\WikiBundle\Tree\Link;
+use Thekwasti\WikiBundle\Tree\ListSharpItem;
+use Thekwasti\WikiBundle\Tree\ListBulletItem;
+use Thekwasti\WikiBundle\Tree\Headline;
+use Thekwasti\WikiBundle\Tree\Text;
+use Thekwasti\WikiBundle\Tree\EmptyLine;
+use Thekwasti\WikiBundle\Tree\Document;
+use Thekwasti\WikiBundle\Tree\NodeInterface;
 
-final class Parser
+class Parser
 {
-    private $markup;
-    private $document;
+    private $lexer;
     
-    public function __construct($markup)
+    public function __construct()
     {
-        if (!is_string($markup)) {
-            throw new \InvalidArgumentException('$markup must be a string');
-        }
-        
-        $markup = str_replace("\r\n", "\n", $markup);
-        $lines = explode("\n", $markup);
-        $this->tree = new Document();
-        
-        $children = array();
-        foreach ($lines as $line) {
-            $children[] = $this->parseLine($line);
-        }
-        
-        $this->document = new Document($children);
-    }
-        
-    private function parseLine($line)
-    {
-        if (trim($line) === '') {
-            return new EmptyLine();
-        } else if (preg_match('/^(=+)(.+)$/', $line, $match)) {
-            return new Headline(strlen($match[1]), $this->parseText($match[2]));
-        } else if (preg_match('/^\-{4,}$/', $line, $match)) {
-            return new HorizontalRule();
-        } else {
-            return $this->parseText($line . ' ');
-        }
+        $this->lexer = new Lexer();
     }
     
-    private function parseText($text)
+    public function parse($markup)
     {
-        if (preg_match('/\*\*([^\*]*)\*\*/', $text, $match, PREG_OFFSET_CAPTURE)) {
-            return $this->splitText($text, $match[0][1], strlen($match[0][0]),
-                new Bold($this->parseText($match[1][0]))
-            );
-        } else if (preg_match('#//([^/]*)//#', $text, $match, PREG_OFFSET_CAPTURE)) {
-            return $this->splitText($text, $match[0][1], strlen($match[0][0]),
-                new Italic($this->parseText($match[1][0]))
-            );
-        } else if (preg_match('/\[\[([^\]]*)\]\]/', $text, $match, PREG_OFFSET_CAPTURE)) {
-            $split = explode("|", $match[1][0]);
+        $i = 0;
+        $tokens = $this->lexer->lex($markup);
+        return $this->recursion('Document', $tokens, $i);
+    }
+    
+    private function recursion($current, $tokens, &$i, $delimiter = null)
+    {
+        if ($current == 'Inline') {
+            $children = array();
             
-            if (count($split) == 1) {
-                return $this->splitText($text, $match[0][1], strlen($match[0][0]),
-                    new Link($split[0], new Text($split[0]))
-                );
-            } else {
-                return $this->splitText($text, $match[0][1], strlen($match[0][0]),
-                    new Link($split[0], $this->parseText($split[1]))
-                );
+            while ($i < count($tokens)) {
+                $token = $tokens[$i];
+                
+                if ($delimiter !== null && $delimiter == $token['type']) {
+                    $i++;
+                    break;
+                }
+                
+                switch ($token['type']) {
+                    case Lexer::T_BOLD:
+                        $i++;
+                        $children[] = new Bold($this->recursion('Inline', $tokens, $i, Lexer::T_BOLD));
+                        break;
+                    case Lexer::T_ITALIC:
+                        $i++;
+                        $children[] = new Italic($this->recursion('Inline', $tokens, $i, Lexer::T_ITALIC));
+                        break;
+                    default:
+                        $i++;
+                        $children[] = new Text($token['value']);
+                        break;
+                }
             }
+            
+            return $children;
+        } else if ($current == 'Document') {
+            $children = array();
+            
+            while ($i < count($tokens)) {
+                $token = $tokens[$i];
+                
+                switch ($token['type']) {
+                    case Lexer::T_NEWLINE:
+                        $i++;
+                        $children[] = new EmptyLine();
+                        break;
+                    case Lexer::T_HEADLINE:
+                        $i++;
+                        $children[] = new Headline(1, $this->recursion('Inline', $tokens, $i, Lexer::T_NEWLINE));
+                        break;
+                    case Lexer::T_HORIZONTAL_RULE:
+                        $i++;
+                        $children[] = new HorizontalRule();
+                        break;
+                    case Lexer::T_LIST_BULLET_ITEM:
+                        $i++;
+                        $children[] = new ListBulletItem(1, $this->recursion('Inline', $tokens, $i, Lexer::T_NEWLINE));
+                        break;
+                    case Lexer::T_LIST_SHARP_ITEM:
+                        $i++;
+                        $children[] = new ListSharpItem(1, $this->recursion('Inline', $tokens, $i, Lexer::T_NEWLINE));
+                        break;
+                    default:
+                        $i++;
+                        $children[] = new Text($token['value']);
+                        break;
+                }
+            }
+            
+            return new Document($children);
         }
-        
-        return new Text($text);
-    }
-    
-    private function splitText($text, $i, $j, NodeInterface $token)
-    {
-        $len = strlen($text);
-        
-        $hasPre = $i > 0 ? true : false;
-        $hasPost = $i + $j < $len ? true : false;
-        
-        if (!$hasPre && !$hasPost) {
-            return $token;
-        }
-        
-        $result = array();
-        
-        if ($hasPre) {
-            $result[] = $this->parseText(substr($text, 0, $i));
-        }
-        
-        $result[] = $token;
-        
-        if ($hasPost) {
-            $result[] = $this->parseText(substr($text, $i + $j));
-        }
-        
-        return $result;
-    }
-    
-    public function getDocument()
-    {
-        return $this->document;
     }
 }
-

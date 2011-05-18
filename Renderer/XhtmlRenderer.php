@@ -2,8 +2,9 @@
 
 namespace Thekwasti\WikiBundle\Renderer;
 
+use Thekwasti\WikiBundle\Tree\ListSharpItem;
+use Thekwasti\WikiBundle\Tree\ListBulletItem;
 use Thekwasti\WikiBundle\Tree\Document;
-
 use Thekwasti\WikiBundle\Tree\HorizontalRule;
 use Thekwasti\WikiBundle\Tree\Link;
 use Thekwasti\WikiBundle\Tree\Italic;
@@ -32,14 +33,18 @@ class XhtmlRenderer implements RendererInterface
             return $element->getText();
         } else if ($element instanceof EmptyLine) {
             return "\n<br/>\n";
-        } else if ($element instanceof HorizontalRule) {
-            return "\n<hr/>\n";
         } else if ($element instanceof Headline) {
             return sprintf("<h%d>%s</h%d>\n",
                 $element->getLevel(),
                 $this->render($element->getChildren()),
                 $element->getLevel()
             );
+        } else if ($element instanceof HorizontalRule) {
+            return "\n<hr/>\n";
+        } else if ($element instanceof ListBulletItem) {
+            return sprintf('<li>%s</li>', $this->render($element->getChildren()));
+        } else if ($element instanceof ListSharpItem) {
+            return sprintf('<li>%s</li>', $this->render($element->getChildren()));
         } else if ($element instanceof Bold) {
             return sprintf('<strong>%s</strong>', $this->render($element->getChildren()));
         } else if ($element instanceof Italic) {
@@ -47,7 +52,7 @@ class XhtmlRenderer implements RendererInterface
         } else if ($element instanceof Link) {
             return sprintf('<a href="%s">%s</a>', $element->getDestination(), $this->render($element->getChildren()));
         } else {
-            throw new Exception();
+            throw new \Exception(sprintf('Unsupported element of type %s', gettype($element) == 'object' ? get_class($element) : gettype($element)));
         }
     }
 }

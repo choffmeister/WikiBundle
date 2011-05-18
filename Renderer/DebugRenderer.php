@@ -32,7 +32,7 @@ class DebugRenderer implements RendererInterface
         } else if ($element instanceof NodeInterface) {
             return str_repeat('    ', $depth) . get_class($element) . "\n" . $this->renderRecursion($element->getChildren(), $depth + 1);
         } else {
-            throw new Exception();
+            throw new \Exception(sprintf('Unsupported element of type %s', gettype($element) == 'object' ? get_class($element) : gettype($element)));
         }
     }
 }

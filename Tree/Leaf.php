@@ -12,4 +12,13 @@ class Leaf implements NodeInterface
     {
         return array();
     }
+    
+    public function serialize()
+    {
+        return '';
+    }
+    
+    public function unserialize($serialized)
+    {
+    }
 }

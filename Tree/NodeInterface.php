@@ -2,7 +2,7 @@
 
 namespace Thekwasti\WikiBundle\Tree;
 
-interface NodeInterface
+interface NodeInterface extends \Serializable
 {
     public function getChildren();
 }

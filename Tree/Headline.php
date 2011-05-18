@@ -17,4 +17,18 @@ class Headline extends Node
     {
         return $this->level;
     }
+    
+    public function serialize()
+    {
+        return serialize(array(
+            $this->level,
+            parent::serialize()
+        ));
+    }
+    
+    public function unserialize($serialized)
+    {
+        list($this->level, $parent) = unserialize($serialized);
+        parent::unserialize($parent);
+    }
 }

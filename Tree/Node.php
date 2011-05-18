@@ -4,15 +4,13 @@ namespace Thekwasti\WikiBundle\Tree;
 
 class Node implements NodeInterface
 {
-    private $children = array();
+    protected $children = array();
     
     public function __construct($children = array())
     {
         if (!is_array($children)) {
             $children = array($children);
         }
-        
-        $children = self::flattenArray($children);
         
         foreach ($children as $child) {
             if (!$child instanceof NodeInterface) {
@@ -28,18 +26,15 @@ class Node implements NodeInterface
         return $this->children;
     }
     
-    private static function flattenArray($array, $result = array())
+    public function serialize()
     {
-        for ($i = 0; $i < count($array); $i++) {
-            if (is_array($array[$i])) {
-                $result = self::flattenArray($array[$i], $result);
-            } else {
-                if ($array[$i]) {
-                    $result[] = $array[$i];
-                }
-            }
-        }
-        
-        return $result;
+        return serialize(array(
+            $this->getChildren()
+        ));
+    }
+    
+    public function unserialize($serialized)
+    {
+        list($this->children) = unserialize($serialized);
     }
 }

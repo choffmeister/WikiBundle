@@ -21,4 +21,18 @@ class Text extends Leaf
     {
         return $this->text;
     }
+    
+    public function serialize()
+    {
+        return serialize(array(
+            $this->text,
+            parent::serialize()
+        ));
+    }
+    
+    public function unserialize($serialized)
+    {
+        list($this->text, $parent) = unserialize($serialized);
+        parent::unserialize($parent);
+    }
 }

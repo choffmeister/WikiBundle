@@ -2,8 +2,9 @@
 
 namespace Thekwasti\WikiBundle\Renderer;
 
+use Thekwasti\WikiBundle\Tree\ListSharpItem;
+use Thekwasti\WikiBundle\Tree\ListBulletItem;
 use Thekwasti\WikiBundle\Tree\Document;
-
 use Thekwasti\WikiBundle\Tree\HorizontalRule;
 use Thekwasti\WikiBundle\Tree\Link;
 use Thekwasti\WikiBundle\Tree\Italic;
@@ -46,8 +47,6 @@ EOF;
             return $element->getText();
         } else if ($element instanceof EmptyLine) {
             return "";//\n\\\\\n";
-        } else if ($element instanceof HorizontalRule) {
-            return "\n\\begin{center}\\rule{0.5\\textwidth}{0.5pt}\\end{center}\n";
         } else if ($element instanceof Headline) {
             $level = $element->getLevel() - 1;
             if ($level > 2) $level = 2;
@@ -56,6 +55,12 @@ EOF;
                 str_repeat('sub', $level),
                 $this->render($element->getChildren())
             );
+        } else if ($element instanceof HorizontalRule) {
+            return "\n\\begin{center}\\rule{0.5\\textwidth}{0.5pt}\\end{center}\n";
+        } else if ($element instanceof ListBulletItem) {
+            return sprintf('* %s', $this->render($element->getChildren()));
+        } else if ($element instanceof ListSharpItem) {
+            return sprintf('* %s', $this->render($element->getChildren()));
         } else if ($element instanceof Bold) {
             return sprintf('\textbf{%s}', $this->render($element->getChildren()));
         } else if ($element instanceof Italic) {
@@ -63,7 +68,7 @@ EOF;
         } else if ($element instanceof Link) {
             return sprintf('%s\footnote{%s}', $this->render($element->getChildren()), $element->getDestination());
         } else {
-            throw new Exception();
+            throw new \Exception();
         }
     }
 }

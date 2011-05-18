@@ -2,33 +2,33 @@
 
 namespace Thekwasti\WikiBundle\Tree;
 
-class Link extends Node
+class ListBulletItem extends Node
 {
-    private $destination;
+    private $level;
     
-    public function __construct($destination, $children)
+    public function __construct($level = 1, $children)
     {
-        $this->destination = trim($destination);
+        $this->level = $level;
         
         parent::__construct($children);
     }
     
-    public function getDestination()
+    public function getLevel()
     {
-        return $this->destination;
+        return $this->level;
     }
     
     public function serialize()
     {
         return serialize(array(
-            $this->destination,
+            $this->level,
             parent::serialize()
         ));
     }
     
     public function unserialize($serialized)
     {
-        list($this->destination, $parent) = unserialize($serialized);
+        list($this->level, $parent) = unserialize($serialized);
         parent::unserialize($parent);
     }
 }
