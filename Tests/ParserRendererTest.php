@@ -17,10 +17,10 @@ class ParserRendererTest extends \PHPUnit_Framework_TestCase
         $doc = $parser->parse($this->markup1);
         
         $renderer = new DebugRenderer();
-        echo $debug = $renderer->render($doc);
+        $debug = $renderer->render($doc);
         
         $renderer = new XhtmlRenderer();
-        echo $xhtml = $renderer->render($doc);
+        $xhtml = $renderer->render($doc);
         
         $renderer = new LatexRenderer();
         $latex = $renderer->render($doc);
