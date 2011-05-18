@@ -16,6 +16,8 @@ use Thekwasti\WikiBundle\Tree\NodeInterface;
 class Parser
 {
     private $lexer;
+    private $tokens;
+    private $i;
     
     public function __construct()
     {
@@ -24,76 +26,72 @@ class Parser
     
     public function parse($markup)
     {
-        $i = 0;
-        $tokens = $this->lexer->lex($markup);
-        return $this->recursion('Document', $tokens, $i);
+        $this->i = 0;
+        $this->tokens = $this->lexer->lex($markup);
+        return $this->recursion('Document');
     }
     
-    private function recursion($current, $tokens, &$i, $delimiter = null)
+    private function recursion($current, $closeToken = null)
     {
-        if ($current == 'Inline') {
-            $children = array();
+        $children = array();
+        
+        while ($this->i < count($this->tokens)) {
+            $token = $this->tokens[$this->i];
+            $type = $token['type'];
+            $value = $token['value'];
             
-            while ($i < count($tokens)) {
-                $token = $tokens[$i];
-                
-                if ($delimiter !== null && $delimiter == $token['type']) {
-                    $i++;
-                    break;
-                }
-                
-                switch ($token['type']) {
-                    case Lexer::T_BOLD:
-                        $i++;
-                        $children[] = new Bold($this->recursion('Inline', $tokens, $i, Lexer::T_BOLD));
-                        break;
-                    case Lexer::T_ITALIC:
-                        $i++;
-                        $children[] = new Italic($this->recursion('Inline', $tokens, $i, Lexer::T_ITALIC));
-                        break;
-                    default:
-                        $i++;
-                        $children[] = new Text($token['value']);
-                        break;
-                }
+            if ($closeToken == $token['type']) {
+                $this->i++;
+                break;
             }
             
-            return $children;
-        } else if ($current == 'Document') {
-            $children = array();
-            
-            while ($i < count($tokens)) {
-                $token = $tokens[$i];
-                
-                switch ($token['type']) {
-                    case Lexer::T_NEWLINE:
-                        $i++;
-                        $children[] = new EmptyLine();
-                        break;
-                    case Lexer::T_HEADLINE:
-                        $i++;
-                        $children[] = new Headline(1, $this->recursion('Inline', $tokens, $i, Lexer::T_NEWLINE));
-                        break;
-                    case Lexer::T_HORIZONTAL_RULE:
-                        $i++;
-                        $children[] = new HorizontalRule();
-                        break;
-                    case Lexer::T_LIST_BULLET_ITEM:
-                        $i++;
-                        $children[] = new ListBulletItem(1, $this->recursion('Inline', $tokens, $i, Lexer::T_NEWLINE));
-                        break;
-                    case Lexer::T_LIST_SHARP_ITEM:
-                        $i++;
-                        $children[] = new ListSharpItem(1, $this->recursion('Inline', $tokens, $i, Lexer::T_NEWLINE));
-                        break;
-                    default:
-                        $i++;
-                        $children[] = new Text($token['value']);
-                        break;
-                }
+            if ($type == Lexer::T_NEWLINE) {
+                $this->i++;
+                $children[] = new EmptyLine();
             }
             
-            return new Document($children);
+            else if ($current == 'Document' && $type == Lexer::T_HEADLINE) {
+                $this->i++;
+                $children[] = new Headline(1, $this->recursion('', Lexer::T_NEWLINE));
+            }
+            
+            else if ($current == 'Document' && $type == Lexer::T_HORIZONTAL_RULE) {
+                $this->i++;
+                $children[] = new HorizontalRule();
+            }
+            
+            else if ($current == 'Document' && $type == Lexer::T_LIST_BULLET_ITEM) {
+                $this->i++;
+                $children[] = new ListBulletItem(1, $this->recursion('', Lexer::T_NEWLINE));
+            }
+            
+            else if ($current == 'Document' && $type == Lexer::T_LIST_SHARP_ITEM) {
+                $this->i++;
+                $children[] = new ListSharpItem(1, $this->recursion('', Lexer::T_NEWLINE));
+            }
+            
+            else if ($type == Lexer::T_BOLD) {
+                $this->i++;
+                $children[] = new Bold($this->recursion('', Lexer::T_BOLD));
+            }
+            
+            else if ($type == Lexer::T_ITALIC) {
+                $this->i++;
+                $children[] = new Italic($this->recursion('', Lexer::T_ITALIC));
+            }
+            
+            else {
+                $this->i++;
+                $children[] = new Text($value);
+            }
         }
+        
+        if ($current === '') {
+            return $children;
+        }
+        
+        $class = '\\Thekwasti\\WikiBundle\\Tree\\' . $current;
+        return new $class($children);
     }
 }
+
