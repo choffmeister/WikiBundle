@@ -36,7 +36,7 @@ EOF;
     protected $documentPost = <<<EOF
 \end{document}
 EOF;
-    
+
     public function render($element)
     {
         if (is_array($element)) {
@@ -62,7 +62,7 @@ EOF;
         } else if ($element instanceof NoWikiInline) {
             return sprintf('\texttt{%s}', $this->render($element->getChildren()));
         } else if ($element instanceof Text) {
-            return $element->getText();
+            return $this->escape($element->getText());
         } else if ($element instanceof EmptyLine) {
             return "\n\n";
         } else if ($element instanceof Headline) {
@@ -84,5 +84,16 @@ EOF;
         } else {
             throw new \Exception(sprintf('Unsupported element of type %s', gettype($element) == 'object' ? get_class($element) : gettype($element)));
         }
+    }
+    
+    public function escape($string)
+    {
+        $specialchars = '\$%^&_{}#~';
+        $escaper = substr(' \ ', 1, 1);
+        
+        for ($i = 0; $i < 10; $i++)
+            $string = str_replace($specialchars[$i], $escaper . $specialchars[$i], $string);
+            
+        return $string;
     }
 }

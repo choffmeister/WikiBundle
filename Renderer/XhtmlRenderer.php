@@ -48,7 +48,7 @@ class XhtmlRenderer implements RendererInterface
         } else if ($element instanceof NoWikiInline) {
             return sprintf('<tt>%s</tt>', $this->render($element->getChildren()));
         } else if ($element instanceof Text) {
-            return $element->getText();
+            return $this->escape($element->getText());
         } else if ($element instanceof EmptyLine) {
             return "\n<br/><br/>\n";
         } else if ($element instanceof Headline) {
@@ -68,5 +68,10 @@ class XhtmlRenderer implements RendererInterface
         } else {
             throw new \Exception(sprintf('Unsupported element of type %s', gettype($element) == 'object' ? get_class($element) : gettype($element)));
         }
+    }
+    
+    public function escape($string)
+    {
+        return htmlspecialchars($string);
     }
 }
