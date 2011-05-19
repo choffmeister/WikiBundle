@@ -2,13 +2,16 @@
 
 namespace Thekwasti\WikiBundle;
 
+use Thekwasti\WikiBundle\Tree\NoWikiInline;
+use Thekwasti\WikiBundle\Tree\ListItem;
+use Thekwasti\WikiBundle\Tree\OrderedList;
+use Thekwasti\WikiBundle\Tree\UnorderedList;
+use Thekwasti\WikiBundle\Tree\Paragraph;
 use Thekwasti\WikiBundle\Tree\NoWiki;
 use Thekwasti\WikiBundle\Tree\Link;
 use Thekwasti\WikiBundle\Tree\HorizontalRule;
 use Thekwasti\WikiBundle\Tree\Bold;
 use Thekwasti\WikiBundle\Tree\Italic;
-use Thekwasti\WikiBundle\Tree\ListSharpItem;
-use Thekwasti\WikiBundle\Tree\ListBulletItem;
 use Thekwasti\WikiBundle\Tree\Headline;
 use Thekwasti\WikiBundle\Tree\Text;
 use Thekwasti\WikiBundle\Tree\EmptyLine;
@@ -30,125 +33,446 @@ class Parser
     {
         $tokens = $this->lexer->lex($markup);
         
+        foreach ($tokens as $token) echo $this->lexer->getLiteral($token['type'])."\n";
+        
+        $i = 0;
         $doc = new Document();
         $stack = new Stack();
-        $stack->push(array($doc, 'root', null));
+        $stack->push($doc);
         
-        for ($i = 0; $i < count($tokens); $i++) {
+        while ($i < count($tokens)) {
             $current = $stack->peek();
             
-            $node = $current[0];
-            $state = $current[1];
-            $closer = is_array($current[2]) ? $current[2] : array($current[2]);
-            
-            $token = $tokens[$i];
-            $type = $token['type'];
-            $value = $token['value'];
-            
-            if (in_array($type, $closer)) {
-                $stack->pop();
-            }
-            
-            else if ($state == 'noparse') {
-                $node->addChild(new Text($value));
-            }
-            
-            else if ($state == 'linkdestination') {
-                if ($type == Lexer::T_LINK_DELIM) {
-                    $stack->pop();
-                    $stack->push(array($node, 'inline_begin', $closer));
-                } else {
-                    $node->setDestination($node->getDestination() . $value);
-                }
-            }
-            
-            else if ($type == Lexer::T_EMPTYLINE) {
-                $node->addChild(new EmptyLine());
-            }
-            
-            else if ($state == 'root' && $type >= Lexer::T_HEADLINE_1 && $type <= Lexer::T_HEADLINE_6) {
-                $headline = new Headline($type - Lexer::T_HEADLINE_1 + 1);
-                $node->addChild($headline);
-                $stack->push(array($headline, 'inline_begin', array(Lexer::T_NEWLINE, Lexer::T_EMPTYLINE)));
-            }
-            
-            else if ($state == 'root' && $type == Lexer::T_HORIZONTAL_RULE) {
-                $node->addChild(new HorizontalRule());
-            }
-            
-            else if ($state == 'root' && $type >= Lexer::T_LIST_BULLET_ITEM_1 && $type <= Lexer::T_LIST_BULLET_ITEM_3) {
-                $listBulletItem = new ListBulletItem($type - Lexer::T_LIST_BULLET_ITEM_1 + 1);
-                $node->addChild($listBulletItem);
-                $stack->push(array($listBulletItem, 'inline_begin', array(Lexer::T_NEWLINE, Lexer::T_EMPTYLINE)));
-            }
-            
-            else if ($state == 'root' && $type >= Lexer::T_LIST_SHARP_ITEM_1 && $type <= Lexer::T_LIST_SHARP_ITEM_3) {
-                $listSharpItem = new ListSharpItem($type - Lexer::T_LIST_SHARP_ITEM_1 + 1);
-                $node->addChild($listSharpItem);
-                $stack->push(array($listSharpItem, 'inline_begin', array(Lexer::T_NEWLINE, Lexer::T_EMPTYLINE)));
-            }
-            
-            else if ($type == Lexer::T_BOLD) {
-                $bold = new Bold();
-                $node->addChild($bold);
-                $stack->push(array($bold, 'inline_begin', Lexer::T_BOLD));
-            }
-            
-            else if ($type == Lexer::T_ITALIC) {
-                $italic = new Italic();
-                $node->addChild($italic);
-                $stack->push(array($italic, 'inline_begin', Lexer::T_ITALIC));
-            }
-            
-            else if ($type == Lexer::T_NOWIKI_OPEN) {
-                $nowiki = new NoWiki();
-                $node->addChild($nowiki);
-                $stack->push(array($nowiki, 'noparse', Lexer::T_NOWIKI_CLOSE));
-            }
-            
-            else if ($type == Lexer::T_LINK_OPEN) {
-                $link = new Link('');
-                $node->addChild($link);
-                $stack->push(array($link, 'linkdestination', Lexer::T_LINK_CLOSE));
-            }
-            
-            else if ($type == Lexer::T_NEWLINE) {
-                $node->addChild(new Text(' '));
-            }
-            
-            else {
-                if ($state == 'inline_begin') {
-                    $node->addChild(new Text(ltrim($value)));
-                    $stack->pop();
-                    $stack->push(array($node, 'inline', $closer));
-                } else {
-                    $node->addChild(new Text($value));
-                }
+            if ($current instanceof Document) {
+                $this->parseStateDocument($stack, $tokens, $i);
+            } else if ($current instanceof Paragraph) {
+                $this->parseStateParagraph($stack, $tokens, $i);
+            } else if ($current instanceof Headline) {
+                $this->parseStateHeadline($stack, $tokens, $i);
+            } else if ($current instanceof UnorderedList) {
+                $this->parseStateUnorderedList($stack, $tokens, $i);
+            } else if ($current instanceof OrderedList) {
+                $this->parseStateOrderedList($stack, $tokens, $i);      
+            } else if ($current instanceof ListItem) {
+                $this->parseStateListItem($stack, $tokens, $i);   
+            } else if ($current instanceof Bold) {
+                $this->parseStateBold($stack, $tokens, $i);
+            } else if ($current instanceof Italic) {
+                $this->parseStateItalic($stack, $tokens, $i);
+            } else if ($current instanceof Link) {
+                $this->parseStateLink($stack, $tokens, $i);
+            } else if ($current instanceof NoWiki) {
+                $this->parseStateNoWiki($stack, $tokens, $i);
+            } else if ($current instanceof NoWikiInline) {
+                $this->parseStateNoWikiInline($stack, $tokens, $i);
+            } else {
+                $i++;
             }
         }
         
-        //$this->postProcess($doc);
         return $doc;
     }
     
-    private function postProcess(NodeInterface $element)
+    private function parseStateDocument(Stack $stack, array $tokens, &$i)
     {
-        $i = 0;
-        $children = $element->getChildren();
-        
-        if (count($children) > 0) {
-            while ($i < count($children)) {
-                if ($i < count($children) - 1 && $children[$i] instanceof Text && $children[$i + 1] instanceof Text) {
-                    $children[$i] = new Text($children[$i]->getText() . $children[$i + 1]->getText());
-                    unset($children[$i+1]);
-                    $children = array_values($children);
-                } else {
-                    $this->postProcess($children[$i]);
-                    $i++;
-                }
-            }
+        $current = $stack->peek();
+        $type = $tokens[$i]['type'];
+        $value = $tokens[$i]['value'];
             
-            $element->setChildren($children);
+        switch ($type) {
+            case Lexer::T_HEADLINE_1:
+            case Lexer::T_HEADLINE_2:
+            case Lexer::T_HEADLINE_3:
+            case Lexer::T_HEADLINE_4:
+            case Lexer::T_HEADLINE_5:
+            case Lexer::T_HEADLINE_6:
+                $headline = new Headline($type - Lexer::T_HEADLINE_1 + 1);
+                $current->addChild($headline);
+                $stack->push($headline);
+                break;
+            case Lexer::T_LIST_BULLET_ITEM_1:
+            case Lexer::T_LIST_BULLET_ITEM_2:
+            case Lexer::T_LIST_BULLET_ITEM_3:
+            case Lexer::T_LIST_BULLET_ITEM_4:
+            case Lexer::T_LIST_BULLET_ITEM_5:
+            case Lexer::T_LIST_BULLET_ITEM_6:
+                $unorderedList = new UnorderedList($type - Lexer::T_LIST_BULLET_ITEM_1 + 1);
+                $current->addChild($unorderedList);
+                $stack->push($unorderedList);
+                break;
+            case Lexer::T_LIST_SHARP_ITEM_1:
+            case Lexer::T_LIST_SHARP_ITEM_2:
+            case Lexer::T_LIST_SHARP_ITEM_3:
+            case Lexer::T_LIST_SHARP_ITEM_4:
+            case Lexer::T_LIST_SHARP_ITEM_5:
+            case Lexer::T_LIST_SHARP_ITEM_6:
+                $orderedList = new OrderedList($type - Lexer::T_LIST_SHARP_ITEM_1 + 1);
+                $current->addChild($orderedList);
+                $stack->push($orderedList);
+                break;
+            case Lexer::T_NOWIKI_OPEN:
+                $noWiki = new NoWiki();
+                $stack->peek()->addChild($noWiki);
+                $stack->push($noWiki);
+                $i++;
+                break;
+            case Lexer::T_EMPTYLINE:
+                $i++;
+                break;
+            case Lexer::T_NEWLINE:
+                $i++;
+                break;
+            default:
+                $paragraph = new Paragraph();
+                $stack->peek()->addChild($paragraph);
+                $stack->push($paragraph);
+                break;
+        }
+    }
+    
+    private function parseStateParagraph(Stack $stack, array $tokens, &$i)
+    {
+        $current = $stack->peek();
+        $type = $tokens[$i]['type'];
+        $value = $tokens[$i]['value'];
+        
+        switch ($type) {
+            case Lexer::T_HEADLINE_1:
+            case Lexer::T_HEADLINE_2:
+            case Lexer::T_HEADLINE_3:
+            case Lexer::T_HEADLINE_4:
+            case Lexer::T_HEADLINE_5:
+            case Lexer::T_HEADLINE_6:    
+            case Lexer::T_EMPTYLINE:
+            case Lexer::T_LIST_BULLET_ITEM_1:
+            case Lexer::T_LIST_BULLET_ITEM_2:
+            case Lexer::T_LIST_BULLET_ITEM_3:
+            case Lexer::T_LIST_BULLET_ITEM_4:
+            case Lexer::T_LIST_BULLET_ITEM_5:
+            case Lexer::T_LIST_BULLET_ITEM_6:
+            case Lexer::T_LIST_SHARP_ITEM_1:
+            case Lexer::T_LIST_SHARP_ITEM_2:
+            case Lexer::T_LIST_SHARP_ITEM_3:
+            case Lexer::T_LIST_SHARP_ITEM_4:
+            case Lexer::T_LIST_SHARP_ITEM_5:
+            case Lexer::T_LIST_SHARP_ITEM_6:
+            case Lexer::T_NOWIKI_OPEN:
+                $stack->pop();
+                break;
+            default:
+                $this->parseStateInline($stack, $tokens, $i);
+                break;
+        }
+    }
+    
+    private function parseStateHeadline(Stack $stack, array $tokens, &$i)
+    {
+        $current = $stack->peek();
+        $type = $tokens[$i]['type'];
+        $value = $tokens[$i]['value'];
+        
+        switch ($type) {
+            case Lexer::T_NEWLINE:
+            case Lexer::T_EMPTYLINE:
+                $stack->pop();
+                $i++;
+                break;
+            default:
+                $this->parseStateInline($stack, $tokens, $i);
+                break;
+        }
+    }
+    
+    private function parseStateUnorderedList(Stack $stack, array $tokens, &$i)
+    {
+        $current = $stack->peek();
+        $type = $tokens[$i]['type'];
+        $value = $tokens[$i]['value'];
+        
+        $level = $type - Lexer::T_LIST_BULLET_ITEM_1 + 1;
+        $currentLevel = $current->getLevel();
+        $ancestorLevels = array();
+        foreach ($stack as $ancestor) {
+            if ($ancestor instanceof OrderedList) {
+                $ancestorLevels[] = $ancestor->getLevel();
+            }
+        }
+        
+        switch ($type) {
+            case Lexer::T_LIST_BULLET_ITEM_1:
+            case Lexer::T_LIST_BULLET_ITEM_2:
+            case Lexer::T_LIST_BULLET_ITEM_3:
+            case Lexer::T_LIST_BULLET_ITEM_4:
+            case Lexer::T_LIST_BULLET_ITEM_5:
+            case Lexer::T_LIST_BULLET_ITEM_6:
+                if ($currentLevel == $level) {
+                    $listItem = new ListItem();
+                    $current->addChild($listItem);
+                    $stack->push($listItem);
+                    $i++;
+                } else if (in_array($level, $ancestorLevels)) {
+                    $stack->pop();
+                } else {
+                    $unorderedList = new UnorderedList($type - Lexer::T_LIST_BULLET_ITEM_1 + 1);
+                    $current->addChild($unorderedList);
+                    $stack->push($unorderedList);
+                }
+                break;
+            case Lexer::T_LIST_SHARP_ITEM_1:
+            case Lexer::T_LIST_SHARP_ITEM_2:
+            case Lexer::T_LIST_SHARP_ITEM_3:
+            case Lexer::T_LIST_SHARP_ITEM_4:
+            case Lexer::T_LIST_SHARP_ITEM_5:
+            case Lexer::T_LIST_SHARP_ITEM_6:
+                $orderedList = new OrderedList($type - Lexer::T_LIST_SHARP_ITEM_1 + 1);
+                $current->addChild($orderedList);
+                $stack->push($orderedList);
+                break;
+            default:
+                $stack->pop();
+                break;
+        }
+    }
+    
+    private function parseStateOrderedList(Stack $stack, array $tokens, &$i)
+    {
+        $current = $stack->peek();
+        $type = $tokens[$i]['type'];
+        $value = $tokens[$i]['value'];
+        
+        $level = $type - Lexer::T_LIST_SHARP_ITEM_1 + 1;
+        $currentLevel = $current->getLevel();
+        $ancestorLevels = array();
+        foreach ($stack as $ancestor) {
+            if ($ancestor instanceof OrderedList) {
+                $ancestorLevels[] = $ancestor->getLevel();
+            }
+        }
+        
+        switch ($type) {
+            case Lexer::T_LIST_SHARP_ITEM_1:
+            case Lexer::T_LIST_SHARP_ITEM_2:
+            case Lexer::T_LIST_SHARP_ITEM_3:
+            case Lexer::T_LIST_SHARP_ITEM_4:
+            case Lexer::T_LIST_SHARP_ITEM_5:
+            case Lexer::T_LIST_SHARP_ITEM_6:
+                if ($currentLevel == $level) {
+                    $listItem = new ListItem();
+                    $current->addChild($listItem);
+                    $stack->push($listItem);
+                    $i++;
+                } else if (in_array($level, $ancestorLevels)) {
+                    $stack->pop();
+                } else {
+                    $orderedList = new OrderedList($type - Lexer::T_LIST_SHARP_ITEM_1 + 1);
+                    $current->addChild($orderedList);
+                    $stack->push($orderedList);
+                }
+                break;
+            case Lexer::T_LIST_BULLET_ITEM_1:
+            case Lexer::T_LIST_BULLET_ITEM_2:
+            case Lexer::T_LIST_BULLET_ITEM_3:
+            case Lexer::T_LIST_BULLET_ITEM_4:
+            case Lexer::T_LIST_BULLET_ITEM_5:
+            case Lexer::T_LIST_BULLET_ITEM_6:
+                $unorderedList = new UnorderedList($type - Lexer::T_LIST_BULLET_ITEM_1 + 1);
+                $current->addChild($unorderedList);
+                $stack->push($unorderedList);
+                break;
+            default:
+                $stack->pop();
+                break;
+        }
+    }
+    
+    private function parseStateListItem(Stack $stack, array $tokens, &$i)
+    {
+        $current = $stack->peek();
+        $type = $tokens[$i]['type'];
+        $value = $tokens[$i]['value'];
+        
+        switch ($type) {
+            case Lexer::T_LIST_BULLET_ITEM_1:
+            case Lexer::T_LIST_BULLET_ITEM_2:
+            case Lexer::T_LIST_BULLET_ITEM_3:
+            case Lexer::T_LIST_BULLET_ITEM_4:
+            case Lexer::T_LIST_BULLET_ITEM_5:
+            case Lexer::T_LIST_BULLET_ITEM_6:
+            case Lexer::T_LIST_SHARP_ITEM_1:
+            case Lexer::T_LIST_SHARP_ITEM_2:
+            case Lexer::T_LIST_SHARP_ITEM_3:
+            case Lexer::T_LIST_SHARP_ITEM_4:
+            case Lexer::T_LIST_SHARP_ITEM_5:
+            case Lexer::T_LIST_SHARP_ITEM_6:
+            case Lexer::T_EMPTYLINE:
+            case Lexer::T_HEADLINE_1:
+            case Lexer::T_HEADLINE_2:
+            case Lexer::T_HEADLINE_3:
+            case Lexer::T_HEADLINE_4:
+            case Lexer::T_HEADLINE_5:
+            case Lexer::T_HEADLINE_6: 
+            case Lexer::T_NOWIKI_OPEN:
+                $stack->pop();
+                break;       
+            default:
+                $this->parseStateInline($stack, $tokens, $i);
+                break;
+        }
+    }
+    
+    private function parseStateBold(Stack $stack, array $tokens, &$i)
+    {
+        $current = $stack->peek();
+        $type = $tokens[$i]['type'];
+        $value = $tokens[$i]['value'];
+        
+        switch ($type) {
+            case Lexer::T_BOLD:
+                $stack->pop();
+                $i++;
+                break;
+            default:
+                $this->parseStateInline($stack, $tokens, $i);
+                break;
+        }
+    }
+    
+    private function parseStateItalic(Stack $stack, array $tokens, &$i)
+    {
+        $current = $stack->peek();
+        $type = $tokens[$i]['type'];
+        $value = $tokens[$i]['value'];
+        
+        switch ($type) {
+            case Lexer::T_ITALIC:
+                $stack->pop();
+                $i++;
+                break;
+            default:
+                $this->parseStateInline($stack, $tokens, $i);
+                break;
+        }
+    }
+    
+    private function parseStateLink(Stack $stack, array $tokens, &$i)
+    {
+        $current = $stack->peek();
+        $type = $tokens[$i]['type'];
+        $value = $tokens[$i]['value'];
+        
+        if ($current->getHasSpecialPresentation() == false) {
+            switch ($type) {
+                case Lexer::T_LINK_DELIM:
+                    $current->setHasSpecialPresentation(true);
+                    $i++;
+                    break;
+                case Lexer::T_LINK_CLOSE:
+                    $stack->pop();
+                    $i++;
+                    break;
+                default:
+                    $current->setDestination($current->getDestination() . $value);
+                    $i++;
+                    break;
+            }
+        } else {
+            switch ($type) {
+                case Lexer::T_LINK_CLOSE:
+                    $stack->pop();
+                    $i++;
+                    break;
+                default:
+                    $this->parseStateInline($stack, $tokens, $i);
+                    break;
+            }
+        }
+    }
+    
+    private function parseStateNoWiki(Stack $stack, array $tokens, &$i)
+    {
+        $current = $stack->peek();
+        $type = $tokens[$i]['type'];
+        $value = $tokens[$i]['value'];
+        
+        switch ($type) {
+            case Lexer::T_NOWIKI_CLOSE:
+                $stack->pop();
+                $i++;
+                break;
+            default:
+                $current->addChild(new Text($value));
+                $i++;
+                break;
+        }
+    }
+    
+    private function parseStateNoWikiInline(Stack $stack, array $tokens, &$i)
+    {
+        $current = $stack->peek();
+        $type = $tokens[$i]['type'];
+        $value = $tokens[$i]['value'];
+        
+        switch ($type) {
+            case Lexer::T_NOWIKI_CLOSE:
+            case Lexer::T_NOWIKI_INLINE_CLOSE:
+                $stack->pop();
+                $i++;
+                break;
+            default:
+                $current->addChild(new Text($value));
+                $i++;
+                break;
+        }
+    }
+    
+    private function parseStateInline(Stack $stack, array $tokens, &$i)
+    {
+        $current = $stack->peek();
+        $type = $tokens[$i]['type'];
+        $value = $tokens[$i]['value'];
+        
+        switch ($type) {
+            case Lexer::T_TEXT:
+                $current->addChild(new Text($value));
+                $i++;
+                break;
+            case Lexer::T_BOLD:
+                $bold = new Bold();
+                $current->addChild($bold);
+                $stack->push($bold);
+                $i++;
+                break;
+            case Lexer::T_ITALIC:
+                $italic = new Italic();
+                $current->addChild($italic);
+                $stack->push($italic);
+                $i++;
+                break;
+            case Lexer::T_HORIZONTAL_RULE:
+                $current->addChild(new HorizontalRule());
+                $i++;
+                break;
+            case Lexer::T_NOWIKI_OPEN:
+                $noWiki = new NoWiki();
+                $current->addChild($noWiki);
+                $stack->push($noWiki);
+                $i++;
+                break;
+            case Lexer::T_NOWIKI_INLINE_OPEN:
+                $noWikiInline = new NoWikiInline();
+                $current->addChild($noWikiInline);
+                $stack->push($noWikiInline);
+                $i++;
+                break;
+            case Lexer::T_LINK_OPEN:
+                $link = new Link();
+                $current->addChild($link);
+                $stack->push($link);
+                $i++;
+                break;
+            default:
+                $i++;
+                break;
         }
     }
 }

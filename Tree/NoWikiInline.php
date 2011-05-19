@@ -2,7 +2,7 @@
 
 namespace Thekwasti\WikiBundle\Tree;
 
-class NoWiki extends Node
+class NoWikiInline extends Node
 {
     
 }

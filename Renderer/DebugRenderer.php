@@ -23,9 +23,9 @@ class DebugRenderer implements RendererInterface
             
             return $result;
         } else if ($element instanceof Text) {
-            return str_repeat('    ', $depth) . get_class($element) . ' ' . $element->getText() . "\n" . $this->renderRecursion($element->getChildren(), $depth + 1);
+            return str_repeat('    ', $depth) . substr(get_class($element), strlen('Thekwasti\WikiBundle\Tree') + 1) . ' ' . $element->getText() . "\n" . $this->renderRecursion($element->getChildren(), $depth + 1);
         } else if ($element instanceof NodeInterface) {
-            return str_repeat('    ', $depth) . get_class($element) . "\n" . $this->renderRecursion($element->getChildren(), $depth + 1);
+            return str_repeat('    ', $depth) . substr(get_class($element), strlen('Thekwasti\WikiBundle\Tree') + 1) . "\n" . $this->renderRecursion($element->getChildren(), $depth + 1);
         } else {
             throw new \Exception(sprintf('Unsupported element of type %s', gettype($element) == 'object' ? get_class($element) : gettype($element)));
         }

@@ -2,7 +2,6 @@
 
 namespace Thekwasti\WikiBundle\Tree;
 
-class NoWiki extends Node
+class Paragraph extends Node
 {
-    
 }

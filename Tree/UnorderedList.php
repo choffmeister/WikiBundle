@@ -2,7 +2,7 @@
 
 namespace Thekwasti\WikiBundle\Tree;
 
-class ListBulletItem extends Node
+class UnorderedList extends Node
 {
     private $level;
     

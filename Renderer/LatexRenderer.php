@@ -2,6 +2,11 @@
 
 namespace Thekwasti\WikiBundle\Renderer;
 
+use Thekwasti\WikiBundle\Tree\NoWikiInline;
+use Thekwasti\WikiBundle\Tree\ListItem;
+use Thekwasti\WikiBundle\Tree\OrderedList;
+use Thekwasti\WikiBundle\Tree\UnorderedList;
+use Thekwasti\WikiBundle\Tree\Paragraph;
 use Thekwasti\WikiBundle\Tree\NoWiki;
 use Thekwasti\WikiBundle\Tree\ListSharpItem;
 use Thekwasti\WikiBundle\Tree\ListBulletItem;
@@ -44,7 +49,17 @@ EOF;
             return $result;
         } else if ($element instanceof Document) {
             return $this->documentPre . $this->render($element->getChildren()) . $this->documentPost;
+        } else if ($element instanceof Paragraph) {
+            return sprintf("\n\n%s\n\n", $this->render($element->getChildren()));
+        } else if ($element instanceof UnorderedList) {
+            return sprintf('\begin{itemize}%s\end{itemize}', $this->render($element->getChildren()));
+        } else if ($element instanceof OrderedList) {
+            return sprintf('\begin{enumerate}%s\end{enumerate}', $this->render($element->getChildren()));
+        } else if ($element instanceof ListItem) {
+            return sprintf("\n\\item %s\n", trim($this->render($element->getChildren())));
         } else if ($element instanceof NoWiki) {
+            return sprintf('\texttt{%s}', $this->render($element->getChildren()));
+        } else if ($element instanceof NoWikiInline) {
             return sprintf('\texttt{%s}', $this->render($element->getChildren()));
         } else if ($element instanceof Text) {
             return $element->getText();
@@ -60,10 +75,6 @@ EOF;
             );
         } else if ($element instanceof HorizontalRule) {
             return "\n\\begin{center}\\rule{0.5\\textwidth}{0.5pt}\\end{center}\n";
-        } else if ($element instanceof ListBulletItem) {
-            return sprintf('* %s', $this->render($element->getChildren()));
-        } else if ($element instanceof ListSharpItem) {
-            return sprintf('* %s', $this->render($element->getChildren()));
         } else if ($element instanceof Bold) {
             return sprintf('\textbf{%s}', $this->render($element->getChildren()));
         } else if ($element instanceof Italic) {
@@ -71,7 +82,7 @@ EOF;
         } else if ($element instanceof Link) {
             return sprintf('%s\footnote{%s}', $this->render($element->getChildren()), $element->getDestination());
         } else {
-            throw new \Exception();
+            throw new \Exception(sprintf('Unsupported element of type %s', gettype($element) == 'object' ? get_class($element) : gettype($element)));
         }
     }
 }

@@ -2,6 +2,11 @@
 
 namespace Thekwasti\WikiBundle\Renderer;
 
+use Thekwasti\WikiBundle\Tree\NoWikiInline;
+use Thekwasti\WikiBundle\Tree\Paragraph;
+use Thekwasti\WikiBundle\Tree\ListItem;
+use Thekwasti\WikiBundle\Tree\OrderedList;
+use Thekwasti\WikiBundle\Tree\UnorderedList;
 use Thekwasti\WikiBundle\Tree\NoWiki;
 use Thekwasti\WikiBundle\Tree\ListSharpItem;
 use Thekwasti\WikiBundle\Tree\ListBulletItem;
@@ -30,8 +35,18 @@ class XhtmlRenderer implements RendererInterface
             return $result;
         } else if ($element instanceof Document) {
             return $this->render($element->getChildren());
+        } else if ($element instanceof Paragraph) {
+            return sprintf('<p>%s</p>', $this->render($element->getChildren()));
+        } else if ($element instanceof UnorderedList) {
+            return sprintf('<ul>%s</ul>', $this->render($element->getChildren()));
+        } else if ($element instanceof OrderedList) {
+            return sprintf('<ol>%s</ol>', $this->render($element->getChildren())); 
+        } else if ($element instanceof ListItem) {
+            return sprintf('<li>%s</li>', $this->render($element->getChildren()));
         } else if ($element instanceof NoWiki) {
             return sprintf('<pre>%s</pre>', $this->render($element->getChildren()));
+        } else if ($element instanceof NoWikiInline) {
+            return sprintf('<tt>%s</tt>', $this->render($element->getChildren()));
         } else if ($element instanceof Text) {
             return $element->getText();
         } else if ($element instanceof EmptyLine) {
@@ -44,10 +59,6 @@ class XhtmlRenderer implements RendererInterface
             );
         } else if ($element instanceof HorizontalRule) {
             return "\n<hr/>\n";
-        } else if ($element instanceof ListBulletItem) {
-            return sprintf('<li>%s</li>', $this->render($element->getChildren()));
-        } else if ($element instanceof ListSharpItem) {
-            return sprintf('<li>%s</li>', $this->render($element->getChildren()));
         } else if ($element instanceof Bold) {
             return sprintf('<strong>%s</strong>', $this->render($element->getChildren()));
         } else if ($element instanceof Italic) {

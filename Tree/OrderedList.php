@@ -2,7 +2,7 @@
 
 namespace Thekwasti\WikiBundle\Tree;
 
-class ListSharpItem extends Node
+class OrderedList extends Node
 {
     private $level;
     

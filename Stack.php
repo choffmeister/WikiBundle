@@ -2,7 +2,7 @@
 
 namespace Thekwasti\WikiBundle;
 
-class Stack implements \Countable
+class Stack implements \Countable, \IteratorAggregate
 {
     private $stack = array();
     private $count = 0;
@@ -35,5 +35,10 @@ class Stack implements \Countable
     public function count()
     {
         return $this->count;
+    }
+    
+    public function getIterator()
+    {
+        return new \ArrayIterator($this->stack);
     }
 }

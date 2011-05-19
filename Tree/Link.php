@@ -4,23 +4,34 @@ namespace Thekwasti\WikiBundle\Tree;
 
 class Link extends Node
 {
-    private $destination;
+    private $destination = '';
+    private $hasSpecialPresentation = false;
     
-    public function __construct($destination, $children = array())
+    public function __construct($destination = '', $children = array())
     {
-        $this->destination = trim($destination);
+        $this->setDestination($destination);
         
         parent::__construct($children);
     }
     
     public function setDestination($destination)
     {
-        $this->destination = $destination;
+        $this->destination = trim($destination);
     }
     
     public function getDestination()
     {
         return $this->destination;
+    }
+    
+    public function setHasSpecialPresentation($hasSpecialPresentation)
+    {
+        $this->hasSpecialPresentation = $hasSpecialPresentation;
+    }
+    
+    public function getHasSpecialPresentation()
+    {
+        return $this->hasSpecialPresentation;
     }
     
     public function serialize()

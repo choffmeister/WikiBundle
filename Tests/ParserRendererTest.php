@@ -13,15 +13,10 @@ class ParserRendererTest extends \PHPUnit_Framework_TestCase
 {
     public function test()
     {
-        
-        $parser = new Parser();
-        $doc2 = $parser->parse($this->markup6);
-        $s = serialize($doc2);
-        
         $a = microtime(true);
-        $doc = unserialize($s);
+        $parser = new Parser();
+        $doc = $parser->parse($this->markup1);
         $b = microtime(true);
-        
         
         $renderer = new DebugRenderer();
         echo $debug = $renderer->render($doc);
@@ -47,14 +42,16 @@ Lorem //ipsum// dolor sit amet, consetetur sadipscing elitr.
 Lorem **//ipsum dolor//** sit amet, consetetur sadipscing elitr.
 Lorem ipsum dolor sit amet, consetetur sadipscing elitr. Lorem ipsum dolor sit amet, consetetur sadipscing elitr. Lorem ipsum dolor sit amet, consetetur sadipscing elitr. Lorem ipsum dolor sit amet, consetetur sadipscing elitr. Lorem ipsum dolor sit amet, consetetur sadipscing elitr.
 
-{{{ ** fold ** }}}
+Inline {{{ ** fold ** }}}
 
 {{{
 no
  = WIKI
 }}}
 
-* asdasd
+* 123
+456
+789
 * asd
 * asdasd
 * asdas
@@ -73,7 +70,7 @@ Click [[mypage]] to watch me!
 Click [[http://www.youtube.com// | You//tube//]] to watch videos!
 
 === ASDASD
-[[asdasd]]=== HALLO
+[[asdasd]]=== HA{{{LL}}}O
 
 asdsad
 ------
@@ -253,15 +250,29 @@ no sea takimata sanctus est Lorem ipsum dolor sit amet.
 MU;
 
     protected $markup6 = <<<MU
-= Headline
+
+
+= Head//li**ne**//asddasdsa//sdfdsfdsfsd//
 
 First line
 Second line
+   
+   
+*Sixth line
+*Sixth line
 
-
-
-Sixth line
-
+# 1
+## 1a
+### 1aa
+### 1ab
+## 1b
+## 1c
+#2
+*Sixth line
+**asdsad
+  
 Eigth line
+* asdsad
+* asd
 MU;
 }
