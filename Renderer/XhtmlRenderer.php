@@ -35,7 +35,7 @@ class XhtmlRenderer implements RendererInterface
         } else if ($element instanceof Text) {
             return $element->getText();
         } else if ($element instanceof EmptyLine) {
-            return "\n<br/>\n";
+            return "\n<br/><br/>\n";
         } else if ($element instanceof Headline) {
             return sprintf("<h%d>%s</h%d>\n",
                 $element->getLevel(),
