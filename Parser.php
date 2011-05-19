@@ -98,6 +98,7 @@ class Parser
                 $headline = new Headline($type - Lexer::T_HEADLINE_1 + 1);
                 $current->addChild($headline);
                 $stack->push($headline);
+                $i++;
                 break;
             case Lexer::T_LIST_BULLET_ITEM_1:
             case Lexer::T_LIST_BULLET_ITEM_2:
