@@ -40,13 +40,13 @@ class XhtmlRenderer implements RendererInterface
         } else if ($element instanceof Document) {
             return $this->render($element->getChildren());
         } else if ($element instanceof Paragraph) {
-            return sprintf('<p>%s</p>', $this->render($element->getChildren()));
+            return sprintf('<p>%s</p>', trim($this->render($element->getChildren())));
         } else if ($element instanceof UnorderedList) {
-            return sprintf('<ul>%s</ul>', $this->render($element->getChildren()));
+            return sprintf('<ul>%s</ul>', trim($this->render($element->getChildren())));
         } else if ($element instanceof OrderedList) {
-            return sprintf('<ol>%s</ol>', $this->render($element->getChildren())); 
+            return sprintf('<ol>%s</ol>', trim($this->render($element->getChildren()))); 
         } else if ($element instanceof ListItem) {
-            return sprintf('<li>%s</li>', $this->render($element->getChildren()));
+            return sprintf('<li>%s</li>', trim($this->render($element->getChildren())));
         } else if ($element instanceof NoWiki) {
             return sprintf('<pre>%s</pre>', $this->render($element->getChildren()));
         } else if ($element instanceof NoWikiInline) {
@@ -70,13 +70,13 @@ class XhtmlRenderer implements RendererInterface
         } else if ($element instanceof Link) {
             return sprintf('<a href="%s">%s</a>', $element->getDestination(), $this->render($element->getChildren()));
         } else if ($element instanceof Table) {
-            return sprintf('<table>%s</table>', $this->render($element->getChildren()));
+            return sprintf('<table>%s</table>', trim($this->render($element->getChildren())));
         } else if ($element instanceof TableRow) {
-            return sprintf('<tr>%s</tr>', $this->render($element->getChildren()));
+            return sprintf('<tr>%s</tr>', trim($this->render($element->getChildren())));
         } else if ($element instanceof TableCell) {
-            return sprintf('<td>%s</td>', $this->render($element->getChildren()));
+            return sprintf('<td>%s</td>', trim($this->render($element->getChildren())));
         } else if ($element instanceof TableCellHead) {
-            return sprintf('<th>%s</th>', $this->render($element->getChildren()));
+            return sprintf('<th>%s</th>', trim($this->render($element->getChildren())));
         } else {
             throw new \Exception(sprintf('Unsupported element of type %s', gettype($element) == 'object' ? get_class($element) : gettype($element)));
         }
