@@ -13,17 +13,28 @@ class ParserRendererTest extends \PHPUnit_Framework_TestCase
 {
     public function test()
     {
+        
         $parser = new Parser();
-        $doc = $parser->parse($this->markup1);
+        $doc2 = $parser->parse($this->markup6);
+        $s = serialize($doc2);
+        
+        $a = microtime(true);
+        $doc = unserialize($s);
+        $b = microtime(true);
+        
         
         $renderer = new DebugRenderer();
-        $debug = $renderer->render($doc);
+        echo $debug = $renderer->render($doc);
         
         $renderer = new XhtmlRenderer();
-        $xhtml = $renderer->render($doc);
+        echo $xhtml = $renderer->render($doc);
         
         $renderer = new LatexRenderer();
         $latex = $renderer->render($doc);
+        
+        file_put_contents('/tmp/latex.tex', $latex);
+        
+        printf("%.3f ms\n", ($b - $a) * 1000);
     }
     
     private $markup1 = <<<MU
@@ -96,8 +107,8 @@ ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, s
 dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,
 no sea takimata sanctus est Lorem ipsum dolor sit amet.
 
-* First
-* Second
+* [[First]]
+* [[ http://www.php.net | Second ]]
 * Third
 
 == Sub
@@ -239,5 +250,18 @@ sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet
 ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et
 dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,
 no sea takimata sanctus est Lorem ipsum dolor sit amet.
+MU;
+
+    protected $markup6 = <<<MU
+= Headline
+
+First line
+Second line
+
+
+
+Sixth line
+
+Eigth line
 MU;
 }

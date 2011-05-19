@@ -6,6 +6,7 @@ class Lexer
 {
     const T_TEXT = 1;
     const T_NEWLINE = 10;
+    const T_EMPTYLINE = 11;
     const T_HEADLINE_1 = 51;
     const T_HEADLINE_2 = 52;
     const T_HEADLINE_3 = 53;
@@ -28,6 +29,7 @@ class Lexer
     const T_NOWIKI_CLOSE = 1002;
     
     private $patterns = array(
+        "\n{2,}",
         "\n",
         '^=+',
         '^\*+',
@@ -76,6 +78,8 @@ class Lexer
         
         if ($value == "\n") {
             return self::T_NEWLINE;
+        } else if (strlen($value) >= 2 && substr($value, 0, 2) == "\n\n") {
+            return self::T_EMPTYLINE;
         } else if ($isLineBeginning && $value[0] == '=') {
             $level = strlen(trim($value));
             if ($level > 6) $level = 6; 

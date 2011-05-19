@@ -2,14 +2,7 @@
 
 namespace Thekwasti\WikiBundle\Renderer;
 
-use Thekwasti\WikiBundle\Tree\HorizontalRule;
-use Thekwasti\WikiBundle\Tree\Link;
-use Thekwasti\WikiBundle\Tree\Italic;
-use Thekwasti\WikiBundle\Tree\Bold;
-use Thekwasti\WikiBundle\Tree\EmptyLine;
 use Thekwasti\WikiBundle\Tree\NodeInterface;
-use Thekwasti\WikiBundle\Tree\Headline;
-use Thekwasti\WikiBundle\Tree\Chain;
 use Thekwasti\WikiBundle\Tree\Text;
 
 class DebugRenderer implements RendererInterface
@@ -29,6 +22,8 @@ class DebugRenderer implements RendererInterface
             }
             
             return $result;
+        } else if ($element instanceof Text) {
+            return str_repeat('    ', $depth) . get_class($element) . ' ' . $element->getText() . "\n" . $this->renderRecursion($element->getChildren(), $depth + 1);
         } else if ($element instanceof NodeInterface) {
             return str_repeat('    ', $depth) . get_class($element) . "\n" . $this->renderRecursion($element->getChildren(), $depth + 1);
         } else {

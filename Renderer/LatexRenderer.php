@@ -45,11 +45,11 @@ EOF;
         } else if ($element instanceof Document) {
             return $this->documentPre . $this->render($element->getChildren()) . $this->documentPost;
         } else if ($element instanceof NoWiki) {
-            return $this->render($element->getChildren());
+            return sprintf('\texttt{%s}', $this->render($element->getChildren()));
         } else if ($element instanceof Text) {
             return $element->getText();
         } else if ($element instanceof EmptyLine) {
-            return "";//\n\\\\\n";
+            return "\n\n";
         } else if ($element instanceof Headline) {
             $level = $element->getLevel() - 1;
             if ($level > 2) $level = 2;

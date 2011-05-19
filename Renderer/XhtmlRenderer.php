@@ -31,7 +31,7 @@ class XhtmlRenderer implements RendererInterface
         } else if ($element instanceof Document) {
             return $this->render($element->getChildren());
         } else if ($element instanceof NoWiki) {
-            return $this->render($element->getChildren());
+            return sprintf('<pre>%s</pre>', $this->render($element->getChildren()));
         } else if ($element instanceof Text) {
             return $element->getText();
         } else if ($element instanceof EmptyLine) {

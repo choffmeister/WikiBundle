@@ -39,13 +39,13 @@ class Parser
             
             $node = $current[0];
             $state = $current[1];
-            $closer = $current[2];
+            $closer = is_array($current[2]) ? $current[2] : array($current[2]);
             
             $token = $tokens[$i];
             $type = $token['type'];
             $value = $token['value'];
             
-            if ($closer !== null && $type == $closer) {
+            if (in_array($type, $closer)) {
                 $stack->pop();
             }
             
@@ -56,16 +56,20 @@ class Parser
             else if ($state == 'linkdestination') {
                 if ($type == Lexer::T_LINK_DELIM) {
                     $stack->pop();
-                    $stack->push(array($node, 'inline', $closer));
+                    $stack->push(array($node, 'inline_begin', $closer));
                 } else {
                     $node->setDestination($node->getDestination() . $value);
                 }
             }
             
+            else if ($type == Lexer::T_EMPTYLINE) {
+                $node->addChild(new EmptyLine());
+            }
+            
             else if ($state == 'root' && $type >= Lexer::T_HEADLINE_1 && $type <= Lexer::T_HEADLINE_6) {
                 $headline = new Headline($type - Lexer::T_HEADLINE_1 + 1);
                 $node->addChild($headline);
-                $stack->push(array($headline, 'inline', Lexer::T_NEWLINE));
+                $stack->push(array($headline, 'inline_begin', array(Lexer::T_NEWLINE, Lexer::T_EMPTYLINE)));
             }
             
             else if ($state == 'root' && $type == Lexer::T_HORIZONTAL_RULE) {
@@ -75,25 +79,25 @@ class Parser
             else if ($state == 'root' && $type >= Lexer::T_LIST_BULLET_ITEM_1 && $type <= Lexer::T_LIST_BULLET_ITEM_3) {
                 $listBulletItem = new ListBulletItem($type - Lexer::T_LIST_BULLET_ITEM_1 + 1);
                 $node->addChild($listBulletItem);
-                $stack->push(array($listBulletItem, 'inline', Lexer::T_NEWLINE));
+                $stack->push(array($listBulletItem, 'inline_begin', array(Lexer::T_NEWLINE, Lexer::T_EMPTYLINE)));
             }
             
             else if ($state == 'root' && $type >= Lexer::T_LIST_SHARP_ITEM_1 && $type <= Lexer::T_LIST_SHARP_ITEM_3) {
                 $listSharpItem = new ListSharpItem($type - Lexer::T_LIST_SHARP_ITEM_1 + 1);
                 $node->addChild($listSharpItem);
-                $stack->push(array($listSharpItem, 'inline', Lexer::T_NEWLINE));
+                $stack->push(array($listSharpItem, 'inline_begin', array(Lexer::T_NEWLINE, Lexer::T_EMPTYLINE)));
             }
             
             else if ($type == Lexer::T_BOLD) {
                 $bold = new Bold();
                 $node->addChild($bold);
-                $stack->push(array($bold, 'inline', Lexer::T_BOLD));
+                $stack->push(array($bold, 'inline_begin', Lexer::T_BOLD));
             }
             
             else if ($type == Lexer::T_ITALIC) {
                 $italic = new Italic();
                 $node->addChild($italic);
-                $stack->push(array($italic, 'inline', Lexer::T_ITALIC));
+                $stack->push(array($italic, 'inline_begin', Lexer::T_ITALIC));
             }
             
             else if ($type == Lexer::T_NOWIKI_OPEN) {
@@ -108,12 +112,44 @@ class Parser
                 $stack->push(array($link, 'linkdestination', Lexer::T_LINK_CLOSE));
             }
             
+            else if ($type == Lexer::T_NEWLINE) {
+                $node->addChild(new Text(' '));
+            }
+            
             else {
-                $node->addChild(new Text($value));
+                if ($state == 'inline_begin') {
+                    $node->addChild(new Text(ltrim($value)));
+                    $stack->pop();
+                    $stack->push(array($node, 'inline', $closer));
+                } else {
+                    $node->addChild(new Text($value));
+                }
             }
         }
         
+        //$this->postProcess($doc);
         return $doc;
+    }
+    
+    private function postProcess(NodeInterface $element)
+    {
+        $i = 0;
+        $children = $element->getChildren();
+        
+        if (count($children) > 0) {
+            while ($i < count($children)) {
+                if ($i < count($children) - 1 && $children[$i] instanceof Text && $children[$i + 1] instanceof Text) {
+                    $children[$i] = new Text($children[$i]->getText() . $children[$i + 1]->getText());
+                    unset($children[$i+1]);
+                    $children = array_values($children);
+                } else {
+                    $this->postProcess($children[$i]);
+                    $i++;
+                }
+            }
+            
+            $element->setChildren($children);
+        }
     }
 }
 
