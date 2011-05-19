@@ -191,7 +191,7 @@ class Parser
         $currentLevel = $current->getLevel();
         $ancestorLevels = array();
         foreach ($stack as $ancestor) {
-            if ($ancestor instanceof OrderedList) {
+            if ($ancestor instanceof UnorderedList) {
                 $ancestorLevels[] = $ancestor->getLevel();
             }
         }
