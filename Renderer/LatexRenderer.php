@@ -2,6 +2,10 @@
 
 namespace Thekwasti\WikiBundle\Renderer;
 
+use Thekwasti\WikiBundle\Tree\TableCellHead;
+use Thekwasti\WikiBundle\Tree\TableCell;
+use Thekwasti\WikiBundle\Tree\TableRow;
+use Thekwasti\WikiBundle\Tree\Table;
 use Thekwasti\WikiBundle\Tree\NoWikiInline;
 use Thekwasti\WikiBundle\Tree\ListItem;
 use Thekwasti\WikiBundle\Tree\OrderedList;
@@ -81,6 +85,8 @@ EOF;
             return sprintf('\textit{%s}', $this->render($element->getChildren()));
         } else if ($element instanceof Link) {
             return sprintf('%s\footnote{%s}', $this->render($element->getChildren()), $element->getDestination());
+        } else if ($element instanceof Table) {
+            return '[Table not supported yet]';
         } else {
             throw new \Exception(sprintf('Unsupported element of type %s', gettype($element) == 'object' ? get_class($element) : gettype($element)));
         }
@@ -89,7 +95,7 @@ EOF;
     public function escape($string)
     {
         $specialchars = '\$%^&_{}#~';
-        $escaper = substr(' \ ', 1, 1);
+        $escaper = "\\";
         
         for ($i = 0; $i < 10; $i++)
             $string = str_replace($specialchars[$i], $escaper . $specialchars[$i], $string);

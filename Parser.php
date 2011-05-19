@@ -2,6 +2,11 @@
 
 namespace Thekwasti\WikiBundle;
 
+use Thekwasti\WikiBundle\Tree\TableRow;
+
+use Thekwasti\WikiBundle\Tree\TableCellHead;
+use Thekwasti\WikiBundle\Tree\TableCell;
+use Thekwasti\WikiBundle\Tree\Table;
 use Thekwasti\WikiBundle\Tree\NoWikiInline;
 use Thekwasti\WikiBundle\Tree\ListItem;
 use Thekwasti\WikiBundle\Tree\OrderedList;
@@ -63,6 +68,12 @@ class Parser
                 $this->parseStateNoWiki($stack, $tokens, $i);
             } else if ($current instanceof NoWikiInline) {
                 $this->parseStateNoWikiInline($stack, $tokens, $i);
+            } else if ($current instanceof Table) {
+                $this->parseStateTable($stack, $tokens, $i);
+            } else if ($current instanceof TableRow) {
+                $this->parseStateTableRow($stack, $tokens, $i);
+            } else if ($current instanceof TableCell || $current instanceof TableCellHead) {
+                $this->parseStateTableCell($stack, $tokens, $i);
             } else {
                 $i++;
             }
@@ -120,6 +131,12 @@ class Parser
             case Lexer::T_NEWLINE:
                 $i++;
                 break;
+            case Lexer::T_DASH:
+            case Lexer::T_TABLE_CELL_HEAD:
+                $table = new Table();
+                $stack->peek()->addChild($table);
+                $stack->push($table);
+                break;
             default:
                 $paragraph = new Paragraph();
                 $stack->peek()->addChild($paragraph);
@@ -155,6 +172,8 @@ class Parser
             case Lexer::T_LIST_SHARP_ITEM_5:
             case Lexer::T_LIST_SHARP_ITEM_6:
             case Lexer::T_NOWIKI_OPEN:
+            case Lexer::T_DASH:
+            case Lexer::T_TABLE_CELL_HEAD:
                 $stack->pop();
                 break;
             default:
@@ -360,7 +379,7 @@ class Parser
         
         if ($current->getHasSpecialPresentation() == false) {
             switch ($type) {
-                case Lexer::T_LINK_DELIM:
+                case Lexer::T_DASH:
                     $current->setHasSpecialPresentation(true);
                     $i++;
                     break;
@@ -423,6 +442,80 @@ class Parser
         }
     }
     
+    private function parseStateTable(Stack $stack, array $tokens, &$i)
+    {
+        $current = $stack->peek();
+        $type = $tokens[$i]['type'];
+        $value = $tokens[$i]['value'];
+        
+        switch ($type) {
+            case Lexer::T_DASH:
+            case Lexer::T_TABLE_CELL_HEAD:
+                $tableRow = new TableRow();
+                $current->addChild($tableRow);
+                $stack->push($tableRow);
+                break;
+            case Lexer::T_NEWLINE:
+                $i++;
+                break;
+            case Lexer::T_NOWIKI_OPEN:
+            case Lexer::T_EMPTYLINE:
+                $stack->pop();
+                break;
+            default:
+                throw new \Exception('Unexpected token ' . $this->lexer->getLiteral($type));
+        }
+    }
+    
+    private function parseStateTableRow(Stack $stack, array $tokens, &$i)
+    {
+        $current = $stack->peek();
+        $type = $tokens[$i]['type'];
+        $value = $tokens[$i]['value'];
+        
+        switch ($type) {
+            case Lexer::T_DASH:
+                $tableCell = new TableCell();
+                $current->addChild($tableCell);
+                $stack->push($tableCell);
+                $i++;
+                break;
+            case Lexer::T_TABLE_CELL_HEAD:
+                $tableCellHead = new TableCellHead();
+                $current->addChild($tableCellHead);
+                $stack->push($tableCellHead);
+                $i++;
+                break;
+            case Lexer::T_EMPTYLINE:
+            case Lexer::T_NEWLINE:
+                $stack->pop();
+                break;
+            default:
+                throw new \Exception('Unexpected token ' . $this->lexer->getLiteral($type));
+        }
+    }
+    
+    private function parseStateTableCell(Stack $stack, array $tokens, &$i)
+    {
+        $current = $stack->peek();
+        $type = $tokens[$i]['type'];
+        $value = $tokens[$i]['value'];
+        
+        switch ($type) {
+            case Lexer::T_DASH:
+            case Lexer::T_TABLE_CELL_HEAD:
+                $stack->pop();
+                break;
+            case Lexer::T_NEWLINE:
+            case Lexer::T_EMPTYLINE:
+                $tableCell = $stack->pop();
+                break;
+            default:
+                $this->parseStateInline($stack, $tokens, $i);
+                break;
+        }
+    }
+    
     private function parseStateInline(Stack $stack, array $tokens, &$i)
     {
         $current = $stack->peek();
@@ -430,10 +523,6 @@ class Parser
         $value = $tokens[$i]['value'];
         
         switch ($type) {
-            case Lexer::T_TEXT:
-                $current->addChild(new Text($value));
-                $i++;
-                break;
             case Lexer::T_BOLD:
                 $bold = new Bold();
                 $current->addChild($bold);
@@ -469,6 +558,7 @@ class Parser
                 $i++;
                 break;
             default:
+                $current->addChild(new Text($value));
                 $i++;
                 break;
         }

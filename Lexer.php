@@ -7,6 +7,7 @@ class Lexer
     const T_TEXT = 1;
     const T_NEWLINE = 10;
     const T_EMPTYLINE = 11;
+    const T_DASH = 20;
     const T_HEADLINE_1 = 51;
     const T_HEADLINE_2 = 52;
     const T_HEADLINE_3 = 53;
@@ -18,7 +19,6 @@ class Lexer
     const T_ITALIC = 102;
     const T_LINK_OPEN = 111;
     const T_LINK_CLOSE = 112;
-    const T_LINK_DELIM = 113;
     const T_LIST_BULLET_ITEM_1 = 121;
     const T_LIST_BULLET_ITEM_2 = 122;
     const T_LIST_BULLET_ITEM_3 = 123;
@@ -31,6 +31,7 @@ class Lexer
     const T_LIST_SHARP_ITEM_4 = 134;
     const T_LIST_SHARP_ITEM_5 = 135;
     const T_LIST_SHARP_ITEM_6 = 136;
+    const T_TABLE_CELL_HEAD = 201;
     const T_NOWIKI_OPEN = 1001;
     const T_NOWIKI_CLOSE = 1002;
     const T_NOWIKI_INLINE_OPEN = 1003;
@@ -47,6 +48,7 @@ class Lexer
         '//',
         '\[\[',
         '\]\]',
+        '\|=',
         '\|',
         '\{\{\{',
         '\}\}\}',
@@ -113,11 +115,15 @@ class Lexer
         } else if ($value == ']]') {
             return self::T_LINK_CLOSE;
         } else if ($value == '|') {
-            return self::T_LINK_DELIM;
+            return self::T_DASH;
         } else if ($value == '{{{') {
             return $isLineBeginning ? self::T_NOWIKI_OPEN : self::T_NOWIKI_INLINE_OPEN;
         } else if ($value == '}}}') {
             return $isLineBeginning ? self::T_NOWIKI_CLOSE : self::T_NOWIKI_INLINE_CLOSE;
+        } else if ($value == '|=') {
+            return self::T_TABLE_CELL_HEAD;
+        } else if ($value == '|') {
+            return self::T_TABLE_CELL;
         }
         
         return self::T_TEXT;

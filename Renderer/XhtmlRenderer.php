@@ -2,6 +2,10 @@
 
 namespace Thekwasti\WikiBundle\Renderer;
 
+use Thekwasti\WikiBundle\Tree\TableCellHead;
+use Thekwasti\WikiBundle\Tree\TableCell;
+use Thekwasti\WikiBundle\Tree\TableRow;
+use Thekwasti\WikiBundle\Tree\Table;
 use Thekwasti\WikiBundle\Tree\NoWikiInline;
 use Thekwasti\WikiBundle\Tree\Paragraph;
 use Thekwasti\WikiBundle\Tree\ListItem;
@@ -65,6 +69,14 @@ class XhtmlRenderer implements RendererInterface
             return sprintf('<em>%s</em>', $this->render($element->getChildren()));
         } else if ($element instanceof Link) {
             return sprintf('<a href="%s">%s</a>', $element->getDestination(), $this->render($element->getChildren()));
+        } else if ($element instanceof Table) {
+            return sprintf('<table>%s</table>', $this->render($element->getChildren()));
+        } else if ($element instanceof TableRow) {
+            return sprintf('<tr>%s</tr>', $this->render($element->getChildren()));
+        } else if ($element instanceof TableCell) {
+            return sprintf('<td>%s</td>', $this->render($element->getChildren()));
+        } else if ($element instanceof TableCellHead) {
+            return sprintf('<th>%s</th>', $this->render($element->getChildren()));
         } else {
             throw new \Exception(sprintf('Unsupported element of type %s', gettype($element) == 'object' ? get_class($element) : gettype($element)));
         }

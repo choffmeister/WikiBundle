@@ -15,7 +15,7 @@ class ParserRendererTest extends \PHPUnit_Framework_TestCase
     {
         $a = microtime(true);
         $parser = new Parser();
-        $doc = $parser->parse($this->markup1);
+        $doc = $parser->parse($this->markup7);
         $b = microtime(true);
         
         $renderer = new DebugRenderer();
@@ -26,9 +26,6 @@ class ParserRendererTest extends \PHPUnit_Framework_TestCase
         
         $renderer = new LatexRenderer();
         $latex = $renderer->render($doc);
-        
-        //file_put_contents('/tmp/latex.tex', $latex);
-        //printf("%.3f ms\n", ($b - $a) * 1000);
     }
     
     private $markup1 = <<<MU
@@ -248,7 +245,7 @@ dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo d
 no sea takimata sanctus est Lorem ipsum dolor sit amet.
 MU;
 
-    protected $markup6 = <<<MU
+    private $markup6 = <<<MU
 
 
 = Head//li**ne**//asddasdsa//sdfdsfdsfsd//
@@ -273,5 +270,13 @@ Second line
 Eigth line
 * asdsad
 * asd
+MU;
+
+    private $markup7 = <<<MU
+asdsad
+
+|= H1 |= H2 |= H3
+|A11  |A12  |A13
+|A21  |A22  |A23
 MU;
 }
