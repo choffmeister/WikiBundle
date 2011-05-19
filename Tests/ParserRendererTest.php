@@ -19,17 +19,16 @@ class ParserRendererTest extends \PHPUnit_Framework_TestCase
         $b = microtime(true);
         
         $renderer = new DebugRenderer();
-        echo $debug = $renderer->render($doc);
+        $debug = $renderer->render($doc);
         
         $renderer = new XhtmlRenderer();
-        echo $xhtml = $renderer->render($doc);
+        $xhtml = $renderer->render($doc);
         
         $renderer = new LatexRenderer();
         $latex = $renderer->render($doc);
         
-        file_put_contents('/tmp/latex.tex', $latex);
-        
-        printf("%.3f ms\n", ($b - $a) * 1000);
+        //file_put_contents('/tmp/latex.tex', $latex);
+        //printf("%.3f ms\n", ($b - $a) * 1000);
     }
     
     private $markup1 = <<<MU

@@ -33,8 +33,6 @@ class Parser
     {
         $tokens = $this->lexer->lex($markup);
         
-        foreach ($tokens as $token) echo $this->lexer->getLiteral($token['type'])."\n";
-        
         $i = 0;
         $doc = new Document();
         $stack = new Stack();
