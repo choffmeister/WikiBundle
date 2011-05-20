@@ -290,6 +290,8 @@ class Parser
             case Lexer::T_HEADLINE:
             case Lexer::T_LIST_BULLET_ITEM:
             case Lexer::T_LIST_SHARP_ITEM:
+                $stack->pop();
+                break;
             case Lexer::T_BOLD:
                 $stack->pop();
                 $i++;
@@ -311,6 +313,8 @@ class Parser
             case Lexer::T_HEADLINE:
             case Lexer::T_LIST_BULLET_ITEM:
             case Lexer::T_LIST_SHARP_ITEM:
+                $stack->pop();
+                break;
             case Lexer::T_ITALIC:
                 $stack->pop();
                 $i++;
@@ -335,6 +339,8 @@ class Parser
                     break;
                 case Lexer::T_NEWLINE:
                 case Lexer::T_EMPTYLINE:
+                    $stack->pop();
+                    break;
                 case Lexer::T_LINK_CLOSE:
                     $stack->pop();
                     $i++;
@@ -478,6 +484,7 @@ class Parser
         
         switch ($type) {
             case Lexer::T_NEWLINE:
+                $current->addChild(new Text(' '));
                 $i++;
                 break;
             case Lexer::T_BOLD:
