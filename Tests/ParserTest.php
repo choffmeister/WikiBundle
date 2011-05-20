@@ -113,6 +113,20 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(new Document(array(new Paragraph(array(new Text('Hello '), new Italic(new Text('fold')))), new Paragraph(array(new Text('asd'), new Italic())))), $doc);
     }
     
+    public function testBoldItalicInterlaced()
+    {
+        $parser = new Parser();
+        
+        $doc = $parser->parse("Hello //**fold**//");
+        $this->assertEquals(new Document(new Paragraph(array(new Text('Hello '), new Italic(new Bold(new Text('fold')))))), $doc);
+        
+        $doc = $parser->parse("Hello **//fold//**");
+        $this->assertEquals(new Document(new Paragraph(array(new Text('Hello '), new Bold(new Italic(new Text('fold')))))), $doc);
+        
+        $doc = $parser->parse("Hello **//fold** No");
+        $this->assertEquals(new Document(new Paragraph(array(new Text('Hello '), new Bold(new Italic(new Text('fold'))), new Text(' No')))), $doc);
+    }
+    
     public function testUnorderedList()
     {
         $parser = new Parser();
