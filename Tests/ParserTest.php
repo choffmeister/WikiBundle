@@ -411,6 +411,18 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         
         $doc = $parser->parse("pre[[apple|foo\n\npost");
         $this->assertEquals(new Document(array(new Paragraph(array(new Text('pre'), new Link('apple', array(new Text('foo')), true))), new Paragraph(new Text('post')))), $doc);
+
+        $doc = $parser->parse("0[[1|2//3]]4");
+        $this->assertEquals(new Document(new Paragraph(array(
+            new Text('0'),
+            new Link('1', array(
+                new Text('2'),
+                new Italic(
+                    new Text('3')
+                ),
+            ), true),
+            new Text('4'),
+        ))), $doc);
     }
     
     public function testTable()
