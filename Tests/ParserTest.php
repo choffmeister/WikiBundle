@@ -19,7 +19,6 @@ use Thekwasti\WikiBundle\Tree\Bold;
 use Thekwasti\WikiBundle\Tree\Italic;
 use Thekwasti\WikiBundle\Tree\Headline;
 use Thekwasti\WikiBundle\Tree\Text;
-use Thekwasti\WikiBundle\Tree\EmptyLine;
 use Thekwasti\WikiBundle\Tree\Document;
 use Thekwasti\WikiBundle\Tree\NodeInterface;
 
