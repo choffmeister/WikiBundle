@@ -24,10 +24,6 @@ use Thekwasti\WikiBundle\Tree\NodeInterface;
 
 class Parser
 {
-    private $lexer;
-    private $tokens;
-    private $i;
-    
     public function __construct()
     {
         $this->lexer = new Lexer();
@@ -35,7 +31,8 @@ class Parser
     
     public function parse($markup)
     {
-        $tokens = $this->lexer->lex($markup);
+        $lexer = new Lexer();
+        $tokens = $lexer->lex($markup);
         
         $i = 0;
         $doc = new Document();
