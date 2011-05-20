@@ -7,9 +7,10 @@ class Link extends Node
     private $destination = '';
     private $hasSpecialPresentation = false;
     
-    public function __construct($destination = '', $children = array())
+    public function __construct($destination = '', $children = array(), $hasSpecialPresentation = false)
     {
         $this->setDestination($destination);
+        $this->setHasSpecialPresentation($hasSpecialPresentation);
         
         parent::__construct($children);
     }
