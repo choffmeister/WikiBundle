@@ -409,6 +409,10 @@ class Parser
                 $stack->pop();
                 $i++;
                 break;
+            case Lexer::T_NEWLINE:
+                $current->addChild(new Text(' '));
+                $i++;
+                break;
             default:
                 $current->addChild(new Text($value));
                 $i++;
