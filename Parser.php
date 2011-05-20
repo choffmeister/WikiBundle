@@ -179,15 +179,6 @@ class Parser
         
         $level = strlen(trim($value));
         $currentLevel = $current->getLevel();
-        $ancestorLevels = array();
-        foreach ($stack as $ancestor) {
-            if ($ancestor instanceof UnorderedList) {
-                $ancestorLevels[] = 'UL'.$ancestor->getLevel();
-            }
-            if ($ancestor instanceof OrderedList) {
-                $ancestorLevels[] = 'OL'.$ancestor->getLevel();
-            }
-        }
         
         switch ($type) {
             case Lexer::T_LIST_BULLET_ITEM:
@@ -196,7 +187,7 @@ class Parser
                     $current->addChild($listItem);
                     $stack->push($listItem);
                     $i++;
-                } else if (in_array('UL'.$level, $ancestorLevels)) {
+                } else if ($stack->has(function($element) use ($level) { return $element instanceof UnorderedList && $element->getLevel() == $level; })) {
                     $stack->pop();
                 } else {
                     $unorderedList = new UnorderedList(strlen(trim($value)));
@@ -205,7 +196,7 @@ class Parser
                 }
                 break;
             case Lexer::T_LIST_SHARP_ITEM:
-                if (in_array('OL'.$level, $ancestorLevels)) {
+                if ($stack->has(function($element) use ($level) { return $element instanceof OrderedList && $element->getLevel() == $level; })) {
                     $stack->pop();
                 } else {
                     $orderedList = new OrderedList(strlen(trim($value)));
@@ -227,15 +218,6 @@ class Parser
         
         $level = strlen(trim($value));
         $currentLevel = $current->getLevel();
-        $ancestorLevels = array();
-        foreach ($stack as $ancestor) {
-            if ($ancestor instanceof UnorderedList) {
-                $ancestorLevels[] = 'UL'.$ancestor->getLevel();
-            }
-            if ($ancestor instanceof OrderedList) {
-                $ancestorLevels[] = 'OL'.$ancestor->getLevel();
-            }
-        }
         
         switch ($type) {
             case Lexer::T_LIST_SHARP_ITEM:
@@ -244,7 +226,7 @@ class Parser
                     $current->addChild($listItem);
                     $stack->push($listItem);
                     $i++;
-                } else if (in_array('OL'.$level, $ancestorLevels)) {
+                } else if ($stack->has(function($element) use ($level) { return $element instanceof OrderedList && $element->getLevel() == $level; })) {
                     $stack->pop();
                 } else {
                     $orderedList = new OrderedList(strlen(trim($value)));
@@ -253,7 +235,7 @@ class Parser
                 }
                 break;
             case Lexer::T_LIST_BULLET_ITEM:
-                if (in_array('UL'.$level, $ancestorLevels)) {
+                if ($stack->has(function($element) use ($level) { return $element instanceof UnorderedList && $element->getLevel() == $level; })) {
                     $stack->pop();
                 } else {
                     $unorderedList = new UnorderedList(strlen(trim($value)));
@@ -497,14 +479,10 @@ class Parser
         $current = $stack->peek();
         $type = $tokens[$i]['type'];
         $value = $tokens[$i]['value'];
-        $stateTokens = array();
-        foreach ($stack as $ancestor) {
-            $stateTokens[] = get_class($ancestor);
-        }
         
         switch ($type) {
             case Lexer::T_NEWLINE:
-                if (!in_array('Thekwasti\WikiBundle\Tree\Headline', $stateTokens)) {
+                if (!$stack->has(function($element) { return $element instanceof Headline; })) {
                     $current->addChild(new Text(' '));
                     $i++;
                 } else {
@@ -512,7 +490,7 @@ class Parser
                 }
                 break;
             case Lexer::T_BOLD:
-                if (!in_array('Thekwasti\WikiBundle\Tree\Bold', $stateTokens)) {
+                if (!$stack->has(function($element) { return $element instanceof Bold; })) {
                     $bold = new Bold();
                     $current->addChild($bold);
                     $stack->push($bold);
@@ -522,7 +500,7 @@ class Parser
                 }
                 break;
             case Lexer::T_ITALIC:
-                if (!in_array('Thekwasti\WikiBundle\Tree\Italic', $stateTokens)) {
+                if (!$stack->has(function($element) { return $element instanceof Italic; })) {
                     $italic = new Italic();
                     $current->addChild($italic);
                     $stack->push($italic);
