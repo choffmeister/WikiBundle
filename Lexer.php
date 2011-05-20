@@ -102,8 +102,6 @@ class Lexer
             return $isLineBeginning ? self::T_NOWIKI_CLOSE : self::T_NOWIKI_INLINE_CLOSE;
         } else if ($value == '|=') {
             return self::T_TABLE_CELL_HEAD;
-        } else if ($value == '|') {
-            return self::T_TABLE_CELL;
         }
         
         return self::T_TEXT;
@@ -127,6 +125,6 @@ class Lexer
             }
         }
         
-        return $token;
+        throw new \InvalidArgumentException(sprintf('Unknown token %d', $token));
     }
 }
