@@ -493,23 +493,39 @@ class Parser
         $current = $stack->peek();
         $type = $tokens[$i]['type'];
         $value = $tokens[$i]['value'];
+        $stateTokens = array();
+        foreach ($stack as $ancestor) {
+            $stateTokens[] = get_class($ancestor);
+        }
         
         switch ($type) {
             case Lexer::T_NEWLINE:
-                $current->addChild(new Text(' '));
-                $i++;
+                if (!in_array('Thekwasti\WikiBundle\Tree\Headline', $stateTokens)) {
+                    $current->addChild(new Text(' '));
+                    $i++;
+                } else {
+                    $stack->pop();
+                }
                 break;
             case Lexer::T_BOLD:
-                $bold = new Bold();
-                $current->addChild($bold);
-                $stack->push($bold);
-                $i++;
+                if (!in_array('Thekwasti\WikiBundle\Tree\Bold', $stateTokens)) {
+                    $bold = new Bold();
+                    $current->addChild($bold);
+                    $stack->push($bold);
+                    $i++;
+                } else {
+                    $stack->pop();
+                }
                 break;
             case Lexer::T_ITALIC:
-                $italic = new Italic();
-                $current->addChild($italic);
-                $stack->push($italic);
-                $i++;
+                if (!in_array('Thekwasti\WikiBundle\Tree\Italic', $stateTokens)) {
+                    $italic = new Italic();
+                    $current->addChild($italic);
+                    $stack->push($italic);
+                    $i++;
+                } else {
+                    $stack->pop();
+                }
                 break;
             case Lexer::T_NOWIKI_INLINE_OPEN:
                 $noWikiInline = new NoWikiInline();
