@@ -2,9 +2,8 @@
 
 namespace Thekwasti\WikiBundle\Tests;
 
-use Thekwasti\WikiBundle\Lexer;
-
 use Thekwasti\WikiBundle\Parser;
+use Thekwasti\WikiBundle\UrlGenerator;
 use Thekwasti\WikiBundle\Renderer\XhtmlRenderer;
 use Thekwasti\WikiBundle\Renderer\LatexRenderer;
 use Thekwasti\WikiBundle\Renderer\DebugRenderer;
@@ -13,6 +12,8 @@ class ParserRendererTest extends \PHPUnit_Framework_TestCase
 {
     public function test()
     {
+        $urlGenerator = new UrlGenerator('http://invalid.domain/{wiki}/{page}');
+        
         for ($i = 1; $i <= 7; $i++) {
             $markupName = 'markup' . $i;
             
@@ -21,13 +22,13 @@ class ParserRendererTest extends \PHPUnit_Framework_TestCase
             $doc = $parser->parse($this->$markupName);
             $b = microtime(true);
             
-            $renderer = new DebugRenderer();
+            $renderer = new DebugRenderer($urlGenerator);
             $debug = $renderer->render($doc);
             
-            $renderer = new XhtmlRenderer();
+            $renderer = new XhtmlRenderer($urlGenerator);
             $xhtml = $renderer->render($doc);
             
-            $renderer = new LatexRenderer();
+            $renderer = new LatexRenderer($urlGenerator);
             $latex = $renderer->render($doc);
         }
     }
