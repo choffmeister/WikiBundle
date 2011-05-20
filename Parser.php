@@ -184,7 +184,10 @@ class Parser
         $ancestorLevels = array();
         foreach ($stack as $ancestor) {
             if ($ancestor instanceof UnorderedList) {
-                $ancestorLevels[] = $ancestor->getLevel();
+                $ancestorLevels[] = 'UL'.$ancestor->getLevel();
+            }
+            if ($ancestor instanceof OrderedList) {
+                $ancestorLevels[] = 'OL'.$ancestor->getLevel();
             }
         }
         
@@ -195,7 +198,7 @@ class Parser
                     $current->addChild($listItem);
                     $stack->push($listItem);
                     $i++;
-                } else if (in_array($level, $ancestorLevels)) {
+                } else if (in_array('UL'.$level, $ancestorLevels)) {
                     $stack->pop();
                 } else {
                     $unorderedList = new UnorderedList(strlen(trim($value)));
@@ -204,9 +207,13 @@ class Parser
                 }
                 break;
             case Lexer::T_LIST_SHARP_ITEM:
-                $orderedList = new OrderedList(strlen(trim($value)));
-                $current->addChild($orderedList);
-                $stack->push($orderedList);
+                if (in_array('OL'.$level, $ancestorLevels)) {
+                    $stack->pop();
+                } else {
+                    $orderedList = new OrderedList(strlen(trim($value)));
+                    $current->addChild($orderedList);
+                    $stack->push($orderedList);
+                }
                 break;
             default:
                 $stack->pop();
@@ -224,8 +231,11 @@ class Parser
         $currentLevel = $current->getLevel();
         $ancestorLevels = array();
         foreach ($stack as $ancestor) {
+            if ($ancestor instanceof UnorderedList) {
+                $ancestorLevels[] = 'UL'.$ancestor->getLevel();
+            }
             if ($ancestor instanceof OrderedList) {
-                $ancestorLevels[] = $ancestor->getLevel();
+                $ancestorLevels[] = 'OL'.$ancestor->getLevel();
             }
         }
         
@@ -236,7 +246,7 @@ class Parser
                     $current->addChild($listItem);
                     $stack->push($listItem);
                     $i++;
-                } else if (in_array($level, $ancestorLevels)) {
+                } else if (in_array('OL'.$level, $ancestorLevels)) {
                     $stack->pop();
                 } else {
                     $orderedList = new OrderedList(strlen(trim($value)));
@@ -245,9 +255,13 @@ class Parser
                 }
                 break;
             case Lexer::T_LIST_BULLET_ITEM:
-                $unorderedList = new UnorderedList(strlen(trim($value)));
-                $current->addChild($unorderedList);
-                $stack->push($unorderedList);
+                if (in_array('UL'.$level, $ancestorLevels)) {
+                    $stack->pop();
+                } else {
+                    $unorderedList = new UnorderedList(strlen(trim($value)));
+                    $current->addChild($unorderedList);
+                    $stack->push($unorderedList);
+                }
                 break;
             default:
                 $stack->pop();
