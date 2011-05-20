@@ -515,12 +515,6 @@ class Parser
                 $stack->push($italic);
                 $i++;
                 break;
-            case Lexer::T_NOWIKI_OPEN:
-                $noWiki = new NoWiki();
-                $current->addChild($noWiki);
-                $stack->push($noWiki);
-                $i++;
-                break;
             case Lexer::T_NOWIKI_INLINE_OPEN:
                 $noWikiInline = new NoWikiInline();
                 $current->addChild($noWikiInline);
