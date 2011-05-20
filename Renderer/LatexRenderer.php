@@ -2,6 +2,7 @@
 
 namespace Thekwasti\WikiBundle\Renderer;
 
+use Thekwasti\WikiBundle\UrlGenerator;
 use Thekwasti\WikiBundle\Tree\TableCellHead;
 use Thekwasti\WikiBundle\Tree\TableCell;
 use Thekwasti\WikiBundle\Tree\TableRow;
@@ -41,8 +42,19 @@ EOF;
 \end{document}
 EOF;
 
-    public function render($element)
+    private $urlGenerator;
+    
+    public function __construct(UrlGenerator $urlGenerator)
     {
+        $this->urlGenerator = $urlGenerator;
+    }
+    
+    public function render($element, $currentWiki = null)
+    {
+        if ($currentWiki !== null) {
+            $this->urlGenerator->setCurrentWiki($currentWiki);
+        }
+        
         if (is_array($element)) {
             $result = '';
             
@@ -84,10 +96,12 @@ EOF;
         } else if ($element instanceof Italic) {
             return sprintf('\textit{%s}', $this->render($element->getChildren()));
         } else if ($element instanceof Link) {
+            $url = $this->urlGenerator->generateUrl($element);
+            
             if ($element->getHasSpecialPresentation()) {
-                return sprintf('%s\footnote{%s}', $this->render($element->getChildren()), trim($element->getDestination()));
+                return sprintf('%s\footnote{%s}', $this->render($element->getChildren()), $this->escape($url));
             } else {
-                return sprintf('%s\footnote{%s}', trim($element->getDestination()), trim($element->getDestination()));
+                return sprintf('%s\footnote{%s}', $this->escape(trim($element->getDestination())), $this->escape($url));
             }
         } else if ($element instanceof Table) {
             return '[Table not supported yet]';

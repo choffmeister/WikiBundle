@@ -5,8 +5,10 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     
     <parameters>
+    	<parameter key="thekwasti_wiki.url_pattern">http://invalid.com/wiki/{wiki}/{page}</parameter>
     	<parameter key="thekwasti_wiki.renderer.xhtml.class">Thekwasti\WikiBundle\Renderer\XhtmlRenderer</parameter>
     	<parameter key="thekwasti_wiki.renderer.latex.class">Thekwasti\WikiBundle\Renderer\LatexRenderer</parameter>
+    	<parameter key="thekwasti_wiki.url_generator.class">Thekwasti\WikiBundle\UrlGenerator</parameter>
     </parameters>
 
     <services>
@@ -19,7 +21,14 @@
             </argument>
         </service>
         
-        <service id="thekwasti_wiki.renderer.xhtml" class="%thekwasti_wiki.renderer.xhtml.class%" />
-        <service id="thekwasti_wiki.renderer.latex" class="%thekwasti_wiki.renderer.latex.class%" />
+        <service id="thekwasti_wiki.renderer.xhtml" class="%thekwasti_wiki.renderer.xhtml.class%">
+        	<argument type="service" id="thekwasti_wiki.url_generator" />
+        </service>
+        <service id="thekwasti_wiki.renderer.latex" class="%thekwasti_wiki.renderer.latex.class%">
+        	<argument type="service" id="thekwasti_wiki.url_generator" />
+        </service>	
+        <service id="thekwasti_wiki.url_generator" class="%thekwasti_wiki.url_generator.class%">
+        	<argument>%thekwasti_wiki.url_pattern%</argument>
+        </service>
     </services>
 </container>

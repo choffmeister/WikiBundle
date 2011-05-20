@@ -2,6 +2,7 @@
 
 namespace Thekwasti\WikiBundle\Renderer;
 
+use Thekwasti\WikiBundle\UrlGenerator;
 use Thekwasti\WikiBundle\Tree\TableCellHead;
 use Thekwasti\WikiBundle\Tree\TableCell;
 use Thekwasti\WikiBundle\Tree\TableRow;
@@ -27,8 +28,19 @@ use Thekwasti\WikiBundle\Tree\Text;
 
 class XhtmlRenderer implements RendererInterface
 {
-    public function render($element)
+    private $urlGenerator;
+    
+    public function __construct(UrlGenerator $urlGenerator)
     {
+        $this->urlGenerator = $urlGenerator;
+    }
+    
+    public function render($element, $currentWiki = null)
+    {
+        if ($currentWiki !== null) {
+            $this->urlGenerator->setCurrentWiki($currentWiki);
+        }
+        
         if (is_array($element)) {
             $result = '';
             
@@ -68,10 +80,12 @@ class XhtmlRenderer implements RendererInterface
         } else if ($element instanceof Italic) {
             return sprintf('<em>%s</em>', $this->render($element->getChildren()));
         } else if ($element instanceof Link) {
+            $url = $this->urlGenerator->generateUrl($element);
+            
             if ($element->getHasSpecialPresentation()) {
-                return sprintf('<a href="%s">%s</a>', trim($element->getDestination()), trim($this->render($element->getChildren())));
+                return sprintf('<a href="%s">%s</a>', $url, trim($this->render($element->getChildren())));
             } else {
-                return sprintf('<a href="%s">%s</a>', trim($element->getDestination()), trim($element->getDestination()));
+                return sprintf('<a href="%s">%s</a>', $url, $this->escape(trim($element->getDestination())));
             }
         } else if ($element instanceof Table) {
             return sprintf("<table>\n%s\n</table>\n", trim($this->render($element->getChildren())));
