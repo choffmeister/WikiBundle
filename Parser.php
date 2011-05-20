@@ -3,7 +3,6 @@
 namespace Thekwasti\WikiBundle;
 
 use Thekwasti\WikiBundle\Tree\TableRow;
-
 use Thekwasti\WikiBundle\Tree\TableCellHead;
 use Thekwasti\WikiBundle\Tree\TableCell;
 use Thekwasti\WikiBundle\Tree\Table;
