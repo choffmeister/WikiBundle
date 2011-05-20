@@ -98,4 +98,205 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $doc = $parser->parse("Hello //fold\n\nasd//");
         $this->assertEquals(new Document(array(new Paragraph(array(new Text('Hello '), new Italic(new Text('fold')))), new Paragraph(array(new Text('asd'), new Italic())))), $doc);
     }
+    
+    public function testUnorderedList()
+    {
+        $parser = new Parser();
+        
+        $doc = $parser->parse("* First\n*Second\n*Third");
+        $this->assertEquals(new Document(new UnorderedList(1, array(new ListItem(array(new Text(' First'), new Text(' '))), new ListItem(array(new Text('Second'), new Text(' '))), new ListItem(array(new Text('Third')))))), $doc);
+        
+        $doc = $parser->parse("asdsad\n* First\n*Second\n*Third");
+        $this->assertEquals(new Document(array(new Paragraph(array(new Text('asdsad'), new Text(' '))), new UnorderedList(1, array(new ListItem(array(new Text(' First'), new Text(' '))), new ListItem(array(new Text('Second'), new Text(' '))), new ListItem(array(new Text('Third'))))))), $doc);
+        
+        $doc = $parser->parse("* First\n*Second\n*Third\n\nasdsad");
+        $this->assertEquals(new Document(array(new UnorderedList(1, array(new ListItem(array(new Text(' First'), new Text(' '))), new ListItem(array(new Text('Second'), new Text(' '))), new ListItem(array(new Text('Third'))))), new Paragraph(new Text('asdsad')))), $doc);
+        
+        $doc = $parser->parse("* First\n*Second\nSecondB\n*Third");
+        $this->assertEquals(new Document(new UnorderedList(1, array(new ListItem(array(new Text(' First'), new Text(' '))), new ListItem(array(new Text('Second'), new Text(' '), new Text('SecondB'), new Text(' '))), new ListItem(new Text('Third'))))), $doc);
+
+        $doc = $parser->parse("*1\n*2\n**2a\n**2b\n*3");
+        $this->assertEquals(new Document(
+            new UnorderedList(1, array(
+                new ListItem(array(new Text('1'), new Text(' '))),
+                new ListItem(array(new Text('2'), new Text(' '))),
+                new UnorderedList(2, array(
+                    new ListItem(array(new Text('2a'), new Text(' '))),
+                    new ListItem(array(new Text('2b'), new Text(' '))),
+                )),
+                new ListItem(array(new Text('3')))
+            ))
+        ), $doc);
+        
+        $doc = $parser->parse("*1\n*2\n**2a\n**2b\n***Deep\n*3");
+        $this->assertEquals(new Document(
+            new UnorderedList(1, array(
+                new ListItem(array(new Text('1'), new Text(' '))),
+                new ListItem(array(new Text('2'), new Text(' '))),
+                new UnorderedList(2, array(
+                    new ListItem(array(new Text('2a'), new Text(' '))),
+                    new ListItem(array(new Text('2b'), new Text(' '))),
+                    new UnorderedList(3, array(
+                        new ListItem(array(new Text('Deep'), new Text(' '))),
+                    )),
+                )),
+                new ListItem(array(new Text('3')))
+            ))
+        ), $doc);
+        
+        $doc = $parser->parse("*1\n*2\n**2a\n**2b\n***Deep\n**2c");
+        $this->assertEquals(new Document(
+            new UnorderedList(1, array(
+                new ListItem(array(new Text('1'), new Text(' '))),
+                new ListItem(array(new Text('2'), new Text(' '))),
+                new UnorderedList(2, array(
+                    new ListItem(array(new Text('2a'), new Text(' '))),
+                    new ListItem(array(new Text('2b'), new Text(' '))),
+                    new UnorderedList(3, array(
+                        new ListItem(array(new Text('Deep'), new Text(' '))),
+                    )),
+                    new ListItem(array(new Text('2c'))),
+                )),
+            ))
+        ), $doc);
+    }
+    
+    public function testOrderedList()
+    {
+        $parser = new Parser();
+        
+        $doc = $parser->parse("# First\n#Second\n#Third");
+        $this->assertEquals(new Document(new OrderedList(1, array(new ListItem(array(new Text(' First'), new Text(' '))), new ListItem(array(new Text('Second'), new Text(' '))), new ListItem(array(new Text('Third')))))), $doc);
+        
+        $doc = $parser->parse("asdsad\n# First\n#Second\n#Third");
+        $this->assertEquals(new Document(array(new Paragraph(array(new Text('asdsad'), new Text(' '))), new OrderedList(1, array(new ListItem(array(new Text(' First'), new Text(' '))), new ListItem(array(new Text('Second'), new Text(' '))), new ListItem(array(new Text('Third'))))))), $doc);
+        
+        $doc = $parser->parse("# First\n#Second\n#Third\n\nasdsad");
+        $this->assertEquals(new Document(array(new OrderedList(1, array(new ListItem(array(new Text(' First'), new Text(' '))), new ListItem(array(new Text('Second'), new Text(' '))), new ListItem(array(new Text('Third'))))), new Paragraph(new Text('asdsad')))), $doc);
+        
+        $doc = $parser->parse("# First\n#Second\nSecondB\n#Third");
+        $this->assertEquals(new Document(new OrderedList(1, array(new ListItem(array(new Text(' First'), new Text(' '))), new ListItem(array(new Text('Second'), new Text(' '), new Text('SecondB'), new Text(' '))), new ListItem(new Text('Third'))))), $doc);
+
+        $doc = $parser->parse("#1\n#2\n##2a\n##2b\n#3");
+        $this->assertEquals(new Document(
+            new OrderedList(1, array(
+                new ListItem(array(new Text('1'), new Text(' '))),
+                new ListItem(array(new Text('2'), new Text(' '))),
+                new OrderedList(2, array(
+                    new ListItem(array(new Text('2a'), new Text(' '))),
+                    new ListItem(array(new Text('2b'), new Text(' '))),
+                )),
+                new ListItem(array(new Text('3')))
+            ))
+        ), $doc);
+        
+        $doc = $parser->parse("#1\n#2\n##2a\n##2b\n###Deep\n#3");
+        $this->assertEquals(new Document(
+            new OrderedList(1, array(
+                new ListItem(array(new Text('1'), new Text(' '))),
+                new ListItem(array(new Text('2'), new Text(' '))),
+                new OrderedList(2, array(
+                    new ListItem(array(new Text('2a'), new Text(' '))),
+                    new ListItem(array(new Text('2b'), new Text(' '))),
+                    new OrderedList(3, array(
+                        new ListItem(array(new Text('Deep'), new Text(' '))),
+                    )),
+                )),
+                new ListItem(array(new Text('3')))
+            ))
+        ), $doc);
+        
+        $doc = $parser->parse("#1\n#2\n##2a\n##2b\n###Deep\n##2c");
+        $this->assertEquals(new Document(
+            new OrderedList(1, array(
+                new ListItem(array(new Text('1'), new Text(' '))),
+                new ListItem(array(new Text('2'), new Text(' '))),
+                new OrderedList(2, array(
+                    new ListItem(array(new Text('2a'), new Text(' '))),
+                    new ListItem(array(new Text('2b'), new Text(' '))),
+                    new OrderedList(3, array(
+                        new ListItem(array(new Text('Deep'), new Text(' '))),
+                    )),
+                    new ListItem(array(new Text('2c'))),
+                )),
+            ))
+        ), $doc);
+    }
+    
+    public function testUnorderedOrderedListInterlaced()
+    {
+        $parser = new Parser();
+        
+        $doc = $parser->parse("*1\n*2\n#3\n#4\n*5");
+        $this->assertEquals(new Document(array(
+            new UnorderedList(1, array(
+                new ListItem(array(new Text('1'), new Text(' '))),
+                new ListItem(array(new Text('2'), new Text(' '))),
+                new OrderedList(1, array(
+                    new ListItem(array(new Text('3'), new Text(' '))),
+                    new ListItem(array(new Text('4'), new Text(' '))),
+                )),
+                new ListItem(array(new Text('5'))),
+            )),
+        )), $doc);
+        
+        $doc = $parser->parse("*1\n*2\n#3\n#4\n##5\n##6\n**7\n***8\n##9");
+        $this->assertEquals(new Document(array(
+            new UnorderedList(1, array(
+                new ListItem(array(new Text('1'), new Text(' '))),
+                new ListItem(array(new Text('2'), new Text(' '))),
+                new OrderedList(1, array(
+                    new ListItem(array(new Text('3'), new Text(' '))),
+                    new ListItem(array(new Text('4'), new Text(' '))),
+                    new OrderedList(2, array(
+                        new ListItem(array(new Text('5'), new Text(' '))),
+                        new ListItem(array(new Text('6'), new Text(' '))),
+                        new UnorderedList(2, array(
+                            new ListItem(array(new Text('7'), new Text(' '))),
+                            new UnorderedList(3, array(
+                                new ListItem(array(new Text('8'), new Text(' '))),
+                            )),
+                        )),
+                        new ListItem(array(new Text('9'))),
+                    )),
+                )),
+            )),
+        )), $doc);
+        
+        $doc = $parser->parse("#1\n#2\n*3\n*4\n#5");
+        $this->assertEquals(new Document(array(
+            new OrderedList(1, array(
+                new ListItem(array(new Text('1'), new Text(' '))),
+                new ListItem(array(new Text('2'), new Text(' '))),
+                new UnorderedList(1, array(
+                    new ListItem(array(new Text('3'), new Text(' '))),
+                    new ListItem(array(new Text('4'), new Text(' '))),
+                )),
+                new ListItem(array(new Text('5'))),
+            )),
+        )), $doc);
+        
+        $doc = $parser->parse("#1\n#2\n*3\n*4\n**5\n**6\n##7\n###8\n**9");
+        $this->assertEquals(new Document(array(
+            new OrderedList(1, array(
+                new ListItem(array(new Text('1'), new Text(' '))),
+                new ListItem(array(new Text('2'), new Text(' '))),
+                new UnorderedList(1, array(
+                    new ListItem(array(new Text('3'), new Text(' '))),
+                    new ListItem(array(new Text('4'), new Text(' '))),
+                    new UnorderedList(2, array(
+                        new ListItem(array(new Text('5'), new Text(' '))),
+                        new ListItem(array(new Text('6'), new Text(' '))),
+                        new OrderedList(2, array(
+                            new ListItem(array(new Text('7'), new Text(' '))),
+                            new OrderedList(3, array(
+                                new ListItem(array(new Text('8'), new Text(' '))),
+                            )),
+                        )),
+                        new ListItem(array(new Text('9'))),
+                    )),
+                )),
+            )),
+        )), $doc);
+    }
 }
