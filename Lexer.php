@@ -39,6 +39,7 @@ class Lexer
         '\}\}\}',
     );
     
+    //FIXME empty lines at the end are lexed as newline
     public function lex($markup)
     {
         if (!is_string($markup)) {
