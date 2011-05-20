@@ -89,34 +89,19 @@ class Parser
         $value = $tokens[$i]['value'];
             
         switch ($type) {
-            case Lexer::T_HEADLINE_1:
-            case Lexer::T_HEADLINE_2:
-            case Lexer::T_HEADLINE_3:
-            case Lexer::T_HEADLINE_4:
-            case Lexer::T_HEADLINE_5:
-            case Lexer::T_HEADLINE_6:
-                $headline = new Headline($type - Lexer::T_HEADLINE_1 + 1);
+            case Lexer::T_HEADLINE:
+                $headline = new Headline(strlen(trim($value)));
                 $current->addChild($headline);
                 $stack->push($headline);
                 $i++;
                 break;
-            case Lexer::T_LIST_BULLET_ITEM_1:
-            case Lexer::T_LIST_BULLET_ITEM_2:
-            case Lexer::T_LIST_BULLET_ITEM_3:
-            case Lexer::T_LIST_BULLET_ITEM_4:
-            case Lexer::T_LIST_BULLET_ITEM_5:
-            case Lexer::T_LIST_BULLET_ITEM_6:
-                $unorderedList = new UnorderedList($type - Lexer::T_LIST_BULLET_ITEM_1 + 1);
+            case Lexer::T_LIST_BULLET_ITEM:
+                $unorderedList = new UnorderedList(strlen(trim($value)));
                 $current->addChild($unorderedList);
                 $stack->push($unorderedList);
                 break;
-            case Lexer::T_LIST_SHARP_ITEM_1:
-            case Lexer::T_LIST_SHARP_ITEM_2:
-            case Lexer::T_LIST_SHARP_ITEM_3:
-            case Lexer::T_LIST_SHARP_ITEM_4:
-            case Lexer::T_LIST_SHARP_ITEM_5:
-            case Lexer::T_LIST_SHARP_ITEM_6:
-                $orderedList = new OrderedList($type - Lexer::T_LIST_SHARP_ITEM_1 + 1);
+            case Lexer::T_LIST_SHARP_ITEM:
+                $orderedList = new OrderedList(strlen(trim($value)));
                 $current->addChild($orderedList);
                 $stack->push($orderedList);
                 break;
@@ -132,7 +117,7 @@ class Parser
             case Lexer::T_NEWLINE:
                 $i++;
                 break;
-            case Lexer::T_DASH:
+            case Lexer::T_PIPE:
             case Lexer::T_TABLE_CELL_HEAD:
                 $table = new Table();
                 $stack->peek()->addChild($table);
@@ -153,27 +138,12 @@ class Parser
         $value = $tokens[$i]['value'];
         
         switch ($type) {
-            case Lexer::T_HEADLINE_1:
-            case Lexer::T_HEADLINE_2:
-            case Lexer::T_HEADLINE_3:
-            case Lexer::T_HEADLINE_4:
-            case Lexer::T_HEADLINE_5:
-            case Lexer::T_HEADLINE_6:    
+            case Lexer::T_HEADLINE: 
             case Lexer::T_EMPTYLINE:
-            case Lexer::T_LIST_BULLET_ITEM_1:
-            case Lexer::T_LIST_BULLET_ITEM_2:
-            case Lexer::T_LIST_BULLET_ITEM_3:
-            case Lexer::T_LIST_BULLET_ITEM_4:
-            case Lexer::T_LIST_BULLET_ITEM_5:
-            case Lexer::T_LIST_BULLET_ITEM_6:
-            case Lexer::T_LIST_SHARP_ITEM_1:
-            case Lexer::T_LIST_SHARP_ITEM_2:
-            case Lexer::T_LIST_SHARP_ITEM_3:
-            case Lexer::T_LIST_SHARP_ITEM_4:
-            case Lexer::T_LIST_SHARP_ITEM_5:
-            case Lexer::T_LIST_SHARP_ITEM_6:
+            case Lexer::T_LIST_BULLET_ITEM:
+            case Lexer::T_LIST_SHARP_ITEM:
             case Lexer::T_NOWIKI_OPEN:
-            case Lexer::T_DASH:
+            case Lexer::T_PIPE:
             case Lexer::T_TABLE_CELL_HEAD:
                 $stack->pop();
                 break;
@@ -207,7 +177,7 @@ class Parser
         $type = $tokens[$i]['type'];
         $value = $tokens[$i]['value'];
         
-        $level = $type - Lexer::T_LIST_BULLET_ITEM_1 + 1;
+        $level = strlen(trim($value));
         $currentLevel = $current->getLevel();
         $ancestorLevels = array();
         foreach ($stack as $ancestor) {
@@ -217,12 +187,7 @@ class Parser
         }
         
         switch ($type) {
-            case Lexer::T_LIST_BULLET_ITEM_1:
-            case Lexer::T_LIST_BULLET_ITEM_2:
-            case Lexer::T_LIST_BULLET_ITEM_3:
-            case Lexer::T_LIST_BULLET_ITEM_4:
-            case Lexer::T_LIST_BULLET_ITEM_5:
-            case Lexer::T_LIST_BULLET_ITEM_6:
+            case Lexer::T_LIST_BULLET_ITEM:
                 if ($currentLevel == $level) {
                     $listItem = new ListItem();
                     $current->addChild($listItem);
@@ -231,18 +196,13 @@ class Parser
                 } else if (in_array($level, $ancestorLevels)) {
                     $stack->pop();
                 } else {
-                    $unorderedList = new UnorderedList($type - Lexer::T_LIST_BULLET_ITEM_1 + 1);
+                    $unorderedList = new UnorderedList(strlen(trim($value)));
                     $current->addChild($unorderedList);
                     $stack->push($unorderedList);
                 }
                 break;
-            case Lexer::T_LIST_SHARP_ITEM_1:
-            case Lexer::T_LIST_SHARP_ITEM_2:
-            case Lexer::T_LIST_SHARP_ITEM_3:
-            case Lexer::T_LIST_SHARP_ITEM_4:
-            case Lexer::T_LIST_SHARP_ITEM_5:
-            case Lexer::T_LIST_SHARP_ITEM_6:
-                $orderedList = new OrderedList($type - Lexer::T_LIST_SHARP_ITEM_1 + 1);
+            case Lexer::T_LIST_SHARP_ITEM:
+                $orderedList = new OrderedList(strlen(trim($value)));
                 $current->addChild($orderedList);
                 $stack->push($orderedList);
                 break;
@@ -258,7 +218,7 @@ class Parser
         $type = $tokens[$i]['type'];
         $value = $tokens[$i]['value'];
         
-        $level = $type - Lexer::T_LIST_SHARP_ITEM_1 + 1;
+        $level = strlen(trim($value));
         $currentLevel = $current->getLevel();
         $ancestorLevels = array();
         foreach ($stack as $ancestor) {
@@ -268,12 +228,7 @@ class Parser
         }
         
         switch ($type) {
-            case Lexer::T_LIST_SHARP_ITEM_1:
-            case Lexer::T_LIST_SHARP_ITEM_2:
-            case Lexer::T_LIST_SHARP_ITEM_3:
-            case Lexer::T_LIST_SHARP_ITEM_4:
-            case Lexer::T_LIST_SHARP_ITEM_5:
-            case Lexer::T_LIST_SHARP_ITEM_6:
+            case Lexer::T_LIST_SHARP_ITEM:
                 if ($currentLevel == $level) {
                     $listItem = new ListItem();
                     $current->addChild($listItem);
@@ -282,18 +237,13 @@ class Parser
                 } else if (in_array($level, $ancestorLevels)) {
                     $stack->pop();
                 } else {
-                    $orderedList = new OrderedList($type - Lexer::T_LIST_SHARP_ITEM_1 + 1);
+                    $orderedList = new OrderedList(strlen(trim($value)));
                     $current->addChild($orderedList);
                     $stack->push($orderedList);
                 }
                 break;
-            case Lexer::T_LIST_BULLET_ITEM_1:
-            case Lexer::T_LIST_BULLET_ITEM_2:
-            case Lexer::T_LIST_BULLET_ITEM_3:
-            case Lexer::T_LIST_BULLET_ITEM_4:
-            case Lexer::T_LIST_BULLET_ITEM_5:
-            case Lexer::T_LIST_BULLET_ITEM_6:
-                $unorderedList = new UnorderedList($type - Lexer::T_LIST_BULLET_ITEM_1 + 1);
+            case Lexer::T_LIST_BULLET_ITEM:
+                $unorderedList = new UnorderedList(strlen(trim($value)));
                 $current->addChild($unorderedList);
                 $stack->push($unorderedList);
                 break;
@@ -310,25 +260,13 @@ class Parser
         $value = $tokens[$i]['value'];
         
         switch ($type) {
-            case Lexer::T_LIST_BULLET_ITEM_1:
-            case Lexer::T_LIST_BULLET_ITEM_2:
-            case Lexer::T_LIST_BULLET_ITEM_3:
-            case Lexer::T_LIST_BULLET_ITEM_4:
-            case Lexer::T_LIST_BULLET_ITEM_5:
-            case Lexer::T_LIST_BULLET_ITEM_6:
-            case Lexer::T_LIST_SHARP_ITEM_1:
-            case Lexer::T_LIST_SHARP_ITEM_2:
-            case Lexer::T_LIST_SHARP_ITEM_3:
-            case Lexer::T_LIST_SHARP_ITEM_4:
-            case Lexer::T_LIST_SHARP_ITEM_5:
-            case Lexer::T_LIST_SHARP_ITEM_6:
+            case Lexer::T_NEWLINE:
+                $i++;
+                break;
+            case Lexer::T_LIST_BULLET_ITEM:
+            case Lexer::T_LIST_SHARP_ITEM:
             case Lexer::T_EMPTYLINE:
-            case Lexer::T_HEADLINE_1:
-            case Lexer::T_HEADLINE_2:
-            case Lexer::T_HEADLINE_3:
-            case Lexer::T_HEADLINE_4:
-            case Lexer::T_HEADLINE_5:
-            case Lexer::T_HEADLINE_6: 
+            case Lexer::T_HEADLINE:
             case Lexer::T_NOWIKI_OPEN:
                 $stack->pop();
                 break;       
@@ -380,7 +318,7 @@ class Parser
         
         if ($current->getHasSpecialPresentation() == false) {
             switch ($type) {
-                case Lexer::T_DASH:
+                case Lexer::T_PIPE:
                     $current->setHasSpecialPresentation(true);
                     $i++;
                     break;
@@ -450,7 +388,7 @@ class Parser
         $value = $tokens[$i]['value'];
         
         switch ($type) {
-            case Lexer::T_DASH:
+            case Lexer::T_PIPE:
             case Lexer::T_TABLE_CELL_HEAD:
                 $tableRow = new TableRow();
                 $current->addChild($tableRow);
@@ -475,7 +413,7 @@ class Parser
         $value = $tokens[$i]['value'];
         
         switch ($type) {
-            case Lexer::T_DASH:
+            case Lexer::T_PIPE:
                 $tableCell = new TableCell();
                 $current->addChild($tableCell);
                 $stack->push($tableCell);
@@ -503,7 +441,7 @@ class Parser
         $value = $tokens[$i]['value'];
         
         switch ($type) {
-            case Lexer::T_DASH:
+            case Lexer::T_PIPE:
             case Lexer::T_TABLE_CELL_HEAD:
                 $stack->pop();
                 break;
@@ -524,6 +462,9 @@ class Parser
         $value = $tokens[$i]['value'];
         
         switch ($type) {
+            case Lexer::T_NEWLINE:
+                $i++;
+                break;
             case Lexer::T_BOLD:
                 $bold = new Bold();
                 $current->addChild($bold);

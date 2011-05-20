@@ -58,7 +58,7 @@ class XhtmlRenderer implements RendererInterface
         } else if ($element instanceof Headline) {
             return sprintf("<h%d>%s</h%d>\n",
                 $element->getLevel(),
-                $this->render($element->getChildren()),
+                trim($this->render($element->getChildren())),
                 $element->getLevel()
             );
         } else if ($element instanceof HorizontalRule) {

@@ -54,15 +54,15 @@ EOF;
         } else if ($element instanceof Document) {
             return $this->documentPre . $this->render($element->getChildren()) . $this->documentPost;
         } else if ($element instanceof Paragraph) {
-            return sprintf("\n\n%s\n\n", $this->render($element->getChildren()));
+            return sprintf("%s\n\n", trim($this->render($element->getChildren())));
         } else if ($element instanceof UnorderedList) {
-            return sprintf('\begin{itemize}%s\end{itemize}', $this->render($element->getChildren()));
+            return sprintf("\\begin{itemize}\n%s\n\\end{itemize}\n", trim($this->render($element->getChildren())));
         } else if ($element instanceof OrderedList) {
-            return sprintf('\begin{enumerate}%s\end{enumerate}', $this->render($element->getChildren()));
+            return sprintf("\\begin{enumerate}\n%s\\end{enumerate}\n", trim($this->render($element->getChildren())));
         } else if ($element instanceof ListItem) {
-            return sprintf("\n\\item %s\n", trim($this->render($element->getChildren())));
+            return sprintf("\\item %s\n", trim($this->render($element->getChildren())));
         } else if ($element instanceof NoWiki) {
-            return sprintf('\texttt{%s}', $this->render($element->getChildren()));
+            return sprintf("\texttt{%s}\n", $this->render($element->getChildren()));
         } else if ($element instanceof NoWikiInline) {
             return sprintf('\texttt{%s}', $this->render($element->getChildren()));
         } else if ($element instanceof Text) {
@@ -75,7 +75,7 @@ EOF;
             
             return sprintf("\\%ssection{%s}\n",
                 str_repeat('sub', $level),
-                $this->render($element->getChildren())
+                trim($this->render($element->getChildren()))
             );
         } else if ($element instanceof HorizontalRule) {
             return "\n\\begin{center}\\rule{0.5\\textwidth}{0.5pt}\\end{center}\n";

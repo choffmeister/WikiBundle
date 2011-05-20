@@ -13,19 +13,23 @@ class ParserRendererTest extends \PHPUnit_Framework_TestCase
 {
     public function test()
     {
-        $a = microtime(true);
-        $parser = new Parser();
-        $doc = $parser->parse($this->markup7);
-        $b = microtime(true);
-        
-        $renderer = new DebugRenderer();
-        $debug = $renderer->render($doc);
-        
-        $renderer = new XhtmlRenderer();
-        $xhtml = $renderer->render($doc);
-        
-        $renderer = new LatexRenderer();
-        $latex = $renderer->render($doc);
+        for ($i = 1; $i <= 7; $i++) {
+            $markupName = 'markup' . $i;
+            
+            $a = microtime(true);
+            $parser = new Parser();
+            $doc = $parser->parse($this->$markupName);
+            $b = microtime(true);
+            
+            $renderer = new DebugRenderer();
+            $debug = $renderer->render($doc);
+            
+            $renderer = new XhtmlRenderer();
+            $xhtml = $renderer->render($doc);
+            
+            $renderer = new LatexRenderer();
+            $latex = $renderer->render($doc);
+        }
     }
     
     private $markup1 = <<<MU
@@ -55,6 +59,7 @@ no
 # asd
 ##asdasd
 ###asdsadsa
+# asd
 
 == Headings 2
 |=First|=Second|
@@ -273,7 +278,7 @@ Eigth line
 MU;
 
     private $markup7 = <<<MU
-asdsad
+= asdsad
 
 |= H1 |= H2 |= H3
 |A11  |A12  |A13

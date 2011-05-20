@@ -7,30 +7,15 @@ class Lexer
     const T_TEXT = 1;
     const T_NEWLINE = 10;
     const T_EMPTYLINE = 11;
-    const T_DASH = 20;
-    const T_HEADLINE_1 = 51;
-    const T_HEADLINE_2 = 52;
-    const T_HEADLINE_3 = 53;
-    const T_HEADLINE_4 = 54;
-    const T_HEADLINE_5 = 55;
-    const T_HEADLINE_6 = 56;
+    const T_PIPE = 20;
+    const T_HEADLINE = 51;
     const T_HORIZONTAL_RULE = 61;
     const T_BOLD = 101;
     const T_ITALIC = 102;
     const T_LINK_OPEN = 111;
     const T_LINK_CLOSE = 112;
-    const T_LIST_BULLET_ITEM_1 = 121;
-    const T_LIST_BULLET_ITEM_2 = 122;
-    const T_LIST_BULLET_ITEM_3 = 123;
-    const T_LIST_BULLET_ITEM_4 = 124;
-    const T_LIST_BULLET_ITEM_5 = 125;
-    const T_LIST_BULLET_ITEM_6 = 126;
-    const T_LIST_SHARP_ITEM_1 = 131;
-    const T_LIST_SHARP_ITEM_2 = 132;
-    const T_LIST_SHARP_ITEM_3 = 133;
-    const T_LIST_SHARP_ITEM_4 = 134;
-    const T_LIST_SHARP_ITEM_5 = 135;
-    const T_LIST_SHARP_ITEM_6 = 136;
+    const T_LIST_BULLET_ITEM = 121;
+    const T_LIST_SHARP_ITEM = 131;
     const T_TABLE_CELL_HEAD = 201;
     const T_NOWIKI_OPEN = 1001;
     const T_NOWIKI_CLOSE = 1002;
@@ -93,17 +78,11 @@ class Lexer
         } else if (preg_match("/^\n{2,}$/", $value)) {
             return self::T_EMPTYLINE;
         } else if ($isLineBeginning && $value[0] == '=') {
-            $level = strlen(trim($value));
-            if ($level > 6) $level = 6; 
-            return self::T_HEADLINE_1 + $level - 1;
+            return self::T_HEADLINE;
         } else if ($isLineBeginning && $value[0] == '*') {
-            $level = strlen(trim($value));
-            if ($level > 6) $level = 6; 
-            return self::T_LIST_BULLET_ITEM_1 + $level - 1;
+            return self::T_LIST_BULLET_ITEM;
         } else if ($isLineBeginning && $value[0] == '#') {
-            $level = strlen(trim($value));
-            if ($level > 6) $level = 6; 
-            return self::T_LIST_SHARP_ITEM_1 + $level - 1;
+            return self::T_LIST_SHARP_ITEM;
         } else if ($isLineBeginning && strlen($value) >= 4 && substr($value, 0, 4) == '----') {
             return self::T_HORIZONTAL_RULE;
         } else if ($value == '**') {
@@ -115,7 +94,7 @@ class Lexer
         } else if ($value == ']]') {
             return self::T_LINK_CLOSE;
         } else if ($value == '|') {
-            return self::T_DASH;
+            return self::T_PIPE;
         } else if ($value == '{{{') {
             return $isLineBeginning ? self::T_NOWIKI_OPEN : self::T_NOWIKI_INLINE_OPEN;
         } else if ($value == '}}}') {
