@@ -368,6 +368,8 @@ class Parser
             switch ($type) {
                 case Lexer::T_NEWLINE:
                 case Lexer::T_EMPTYLINE:
+                    $stack->pop();
+                    break;
                 case Lexer::T_LINK_CLOSE:
                     $stack->pop();
                     $i++;
