@@ -60,4 +60,22 @@ class StackTest extends \PHPUnit_Framework_TestCase
             $this->assertInstanceOf('LogicException', $ex, '->peek should throw a LogicException');
         }
     }
+    
+    public function testHas()
+    {
+        $o1 = new \stdClass();
+        $o2 = new \DateTime();
+        $o3 = 23;
+        
+        $stack = new Stack();
+        
+        $stack->push($o1);
+        $stack->push($o2);
+        $stack->push($o3);
+        
+        $this->assertFalse($stack->has(function($element) { return is_int($element) && $element != 23; }));
+        $this->assertTrue($stack->has(function($element) { return is_int($element) && $element == 23; }));
+        $this->assertFalse($stack->has(function($element) { return $element instanceof \Closure; }));
+        $this->assertTrue($stack->has(function($element) { return $element instanceof \DateTime; }));
+    }
 }

@@ -32,6 +32,17 @@ class Stack implements \Countable, \IteratorAggregate
         return end($this->stack);
     }
     
+    public function has(\Closure $callback)
+    {
+        foreach ($this->stack as $element) {
+            if ($callback($element)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
     public function count()
     {
         return $this->count;
