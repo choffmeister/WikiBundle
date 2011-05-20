@@ -25,6 +25,7 @@
             <directory>./</directory>
             <exclude>
                 <directory>./Tests</directory>
+                <directory>./Twig</directory>
             </exclude>
         </whitelist>
     </filter>
