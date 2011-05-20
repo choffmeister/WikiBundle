@@ -423,7 +423,8 @@ class Parser
                 $stack->pop();
                 break;
             default:
-                throw new \Exception('Unexpected token ' . $this->lexer->getLiteral($type));
+                $stack->pop();
+                break;
         }
     }
     
@@ -451,7 +452,8 @@ class Parser
                 $stack->pop();
                 break;
             default:
-                throw new \Exception('Unexpected token ' . $this->lexer->getLiteral($type));
+                $stack->pop();
+                break;
         }
     }
     
