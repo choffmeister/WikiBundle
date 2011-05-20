@@ -8,7 +8,7 @@ use Thekwasti\WikiBundle\Renderer\XhtmlRenderer;
 use Thekwasti\WikiBundle\Renderer\LatexRenderer;
 use Thekwasti\WikiBundle\Renderer\DebugRenderer;
 
-class ParserRendererTest extends \PHPUnit_Framework_TestCase
+class RendererFuzyTest extends \PHPUnit_Framework_TestCase
 {
     public function test()
     {
