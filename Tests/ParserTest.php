@@ -299,4 +299,28 @@ class ParserTest extends \PHPUnit_Framework_TestCase
             )),
         )), $doc);
     }
+    
+    public function testLink()
+    {
+        $parser = new Parser();
+        
+        $doc = $parser->parse("[[apple]]");
+        $this->assertEquals(new Document(new Paragraph(new Link('apple'))), $doc);
+        
+        $doc = $parser->parse("[[apple|]]");
+        $this->assertEquals(new Document(new Paragraph(new Link('apple', array(), true))), $doc);
+        
+        $doc = $parser->parse("[[apple|asd]]");
+        $this->assertEquals(new Document(new Paragraph(new Link('apple', array(new Text('asd')), true))), $doc);
+        
+        $doc = $parser->parse("[[apple|//asd//]]");
+        $this->assertEquals(new Document(new Paragraph(new Link('apple', array(new Italic(new Text('asd'))), true))), $doc);
+        
+        //TODO maybe ]] should close the italic state
+        $doc = $parser->parse("[[apple|//asd]]");
+        $this->assertEquals(new Document(new Paragraph(new Link('apple', array(new Italic(array(new Text('asd'), new Text(']]')))), true))), $doc);
+        
+        $doc = $parser->parse("pre[[apple|//asd//]]post");
+        $this->assertEquals(new Document(new Paragraph(array(new Text('pre'), new Link('apple', array(new Italic(new Text('asd'))), true), new Text('post')))), $doc);
+    }
 }
