@@ -111,9 +111,11 @@ class Parser
                 $stack->push($noWiki);
                 $i++;
                 break;
-            case Lexer::T_EMPTYLINE:
+            case Lexer::T_HORIZONTAL_RULE:
+                $current->addChild(new HorizontalRule());
                 $i++;
                 break;
+            case Lexer::T_EMPTYLINE:
             case Lexer::T_NEWLINE:
                 $i++;
                 break;
@@ -145,6 +147,7 @@ class Parser
             case Lexer::T_NOWIKI_OPEN:
             case Lexer::T_PIPE:
             case Lexer::T_TABLE_CELL_HEAD:
+            case Lexer::T_HORIZONTAL_RULE:
                 $stack->pop();
                 break;
             default:
@@ -283,6 +286,10 @@ class Parser
         $value = $tokens[$i]['value'];
         
         switch ($type) {
+            case Lexer::T_EMPTYLINE:
+            case Lexer::T_HEADLINE:
+            case Lexer::T_LIST_BULLET_ITEM:
+            case Lexer::T_LIST_SHARP_ITEM:
             case Lexer::T_BOLD:
                 $stack->pop();
                 $i++;
@@ -300,6 +307,10 @@ class Parser
         $value = $tokens[$i]['value'];
         
         switch ($type) {
+            case Lexer::T_EMPTYLINE:
+            case Lexer::T_HEADLINE:
+            case Lexer::T_LIST_BULLET_ITEM:
+            case Lexer::T_LIST_SHARP_ITEM:
             case Lexer::T_ITALIC:
                 $stack->pop();
                 $i++;
@@ -322,6 +333,8 @@ class Parser
                     $current->setHasSpecialPresentation(true);
                     $i++;
                     break;
+                case Lexer::T_NEWLINE:
+                case Lexer::T_EMPTYLINE:
                 case Lexer::T_LINK_CLOSE:
                     $stack->pop();
                     $i++;
@@ -333,6 +346,8 @@ class Parser
             }
         } else {
             switch ($type) {
+                case Lexer::T_NEWLINE:
+                case Lexer::T_EMPTYLINE:
                 case Lexer::T_LINK_CLOSE:
                     $stack->pop();
                     $i++;
@@ -475,10 +490,6 @@ class Parser
                 $italic = new Italic();
                 $current->addChild($italic);
                 $stack->push($italic);
-                $i++;
-                break;
-            case Lexer::T_HORIZONTAL_RULE:
-                $current->addChild(new HorizontalRule());
                 $i++;
                 break;
             case Lexer::T_NOWIKI_OPEN:
