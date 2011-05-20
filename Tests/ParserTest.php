@@ -128,6 +128,44 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         
         $doc = $parser->parse("Hello **//fold** No");
         $this->assertEquals(new Document(new Paragraph(array(new Text('Hello '), new Bold(new Italic(new Text('fold'))), new Text(' No')))), $doc);
+    
+        $doc = $parser->parse("0**1//2**3**4//5**6");
+        $this->assertEquals(new Document(new Paragraph(array(
+            new Text('0'),
+            new Bold(array(
+                new Text('1'),
+                new Italic(array(
+                    new Text('2'),
+                )),
+            )),
+            new Text('3'),
+            new Bold(array(
+                new Text('4'),
+                new Italic(array(
+                    new Text('5'),
+                )),
+            )),
+            new Text('6'),
+        ))), $doc);
+        
+        $doc = $parser->parse("0//1**2//3//4**5//6");
+        $this->assertEquals(new Document(new Paragraph(array(
+            new Text('0'),
+            new Italic(array(
+                new Text('1'),
+                new Bold(array(
+                    new Text('2'),
+                )),
+            )),
+            new Text('3'),
+            new Italic(array(
+                new Text('4'),
+                new Bold(array(
+                    new Text('5'),
+                )),
+            )),
+            new Text('6'),
+        ))), $doc);
     }
     
     public function testHeadlineBoldInterlaced()
