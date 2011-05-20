@@ -123,6 +123,9 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $doc = $parser->parse("Hello **//fold//**");
         $this->assertEquals(new Document(new Paragraph(array(new Text('Hello '), new Bold(new Italic(new Text('fold')))))), $doc);
         
+        $doc = $parser->parse("Hello //**fold// No");
+        $this->assertEquals(new Document(new Paragraph(array(new Text('Hello '), new Italic(new Bold(new Text('fold'))), new Text(' No')))), $doc);
+        
         $doc = $parser->parse("Hello **//fold** No");
         $this->assertEquals(new Document(new Paragraph(array(new Text('Hello '), new Bold(new Italic(new Text('fold'))), new Text(' No')))), $doc);
     }
