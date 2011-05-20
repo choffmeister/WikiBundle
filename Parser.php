@@ -521,6 +521,14 @@ class Parser
                 $stack->push($link);
                 $i++;
                 break;
+            case Lexer::T_LINK_CLOSE:
+                if ($stack->has(function($element) { return $element instanceof Link; })) {
+                    $stack->pop();
+                } else {
+                    $current->addChild(new Text($value));
+                    $i++;
+                }
+                break;
             default:
                 $current->addChild(new Text($value));
                 $i++;
