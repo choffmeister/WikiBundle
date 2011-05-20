@@ -37,11 +37,26 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         
         $doc = $parser->parse("\n\nfoo");
         $this->assertEquals(new Document(new Paragraph(array(new Text('foo')))), $doc); 
+
+        $doc = $parser->parse("\n\n\n\n\nfoo");
+        $this->assertEquals(new Document(new Paragraph(array(new Text('foo')))), $doc); 
+        
+        $doc = $parser->parse("foo\n");
+        $this->assertEquals(new Document(new Paragraph(array(new Text('foo'), new Text(' ')))), $doc); 
+        
+        $doc = $parser->parse("foo\n\n");
+        $this->assertEquals(new Document(new Paragraph(array(new Text('foo'), new Text(' ')))), $doc); 
+
+        $doc = $parser->parse("foo\n\n\n\n\n");
+        $this->assertEquals(new Document(new Paragraph(array(new Text('foo'), new Text(' ')))), $doc); 
         
         $doc = $parser->parse("foo\nfoo2");
         $this->assertEquals(new Document(new Paragraph(array(new Text('foo'), new Text(' '), new Text('foo2')))), $doc); 
         
         $doc = $parser->parse("foo\n\nfoo2");
+        $this->assertEquals(new Document(array(new Paragraph(new Text('foo')), new Paragraph(new Text('foo2')))), $doc); 
+        
+        $doc = $parser->parse("foo\n\n\n\n\nfoo2");
         $this->assertEquals(new Document(array(new Paragraph(new Text('foo')), new Paragraph(new Text('foo2')))), $doc); 
     }
     
@@ -322,5 +337,111 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         
         $doc = $parser->parse("pre[[apple|//asd//]]post");
         $this->assertEquals(new Document(new Paragraph(array(new Text('pre'), new Link('apple', array(new Italic(new Text('asd'))), true), new Text('post')))), $doc);
+        
+        $doc = $parser->parse("pre[[apple\n\npost");
+        $this->assertEquals(new Document(array(new Paragraph(array(new Text('pre'), new Link('apple'))), new Paragraph(new Text('post')))), $doc);
+        
+        $doc = $parser->parse("pre[[apple|foo\n\npost");
+        $this->assertEquals(new Document(array(new Paragraph(array(new Text('pre'), new Link('apple', array(new Text('foo')), true))), new Paragraph(new Text('post')))), $doc);
+    }
+    
+    public function testTable()
+    {
+        $parser = new Parser();
+        
+        $doc = $parser->parse("|=H1|= H2 \n|1a|1b \n| 2a| 2b ");
+        $this->assertEquals(new Document(
+            new Table(array(
+                new TableRow(array(
+                    new TableCellHead(new Text('H1')),
+                    new TableCellHead(new Text(' H2 ')),
+                )),
+                new TableRow(array(
+                    new TableCell(new Text('1a')),
+                    new TableCell(new Text('1b ')),
+                )),
+                new TableRow(array(
+                    new TableCell(new Text(' 2a')),
+                    new TableCell(new Text(' 2b ')),
+                )),
+            ))
+        ), $doc);
+        
+        $doc = $parser->parse("pre\n|=H1|= H2 \n|1a|1b \n| 2a| 2b \npost");
+        $this->assertEquals(new Document(array(
+            new Paragraph(array(new Text('pre'), new Text(' '))),
+            new Table(array(
+                new TableRow(array(
+                    new TableCellHead(new Text('H1')),
+                    new TableCellHead(new Text(' H2 ')),
+                )),
+                new TableRow(array(
+                    new TableCell(new Text('1a')),
+                    new TableCell(new Text('1b ')),
+                )),
+                new TableRow(array(
+                    new TableCell(new Text(' 2a')),
+                    new TableCell(new Text(' 2b ')),
+                )),
+            )),
+            new Paragraph(new Text('post')),
+        )), $doc);
+        
+        $doc = $parser->parse("pre\n|=H1|= H2 \n\n|1a|1b \n| 2a| 2b \npost");
+        $this->assertEquals(new Document(array(
+            new Paragraph(array(new Text('pre'), new Text(' '))),
+            new Table(array(
+                new TableRow(array(
+                    new TableCellHead(new Text('H1')),
+                    new TableCellHead(new Text(' H2 ')),
+                )),
+            )),
+            new Table(array(
+                new TableRow(array(
+                    new TableCell(new Text('1a')),
+                    new TableCell(new Text('1b ')),
+                )),
+                new TableRow(array(
+                    new TableCell(new Text(' 2a')),
+                    new TableCell(new Text(' 2b ')),
+                )),
+            )),
+            new Paragraph(new Text('post')),
+        )), $doc);
+    }
+    
+    public function testNoWiki()
+    {
+        $parser = new Parser();
+        
+        $doc = $parser->parse("{{{nowiki\n}}}");
+        $this->assertEquals(new Document(new NoWiki(array(new Text('nowiki'), new Text("\n")))), $doc);
+        
+        $doc = $parser->parse("{{{**no**wiki\n}}}");
+        $this->assertEquals(new Document(new NoWiki(array(new Text('**'), new Text('no'), new Text('**'), new Text('wiki'), new Text("\n")))), $doc);
+
+        $doc = $parser->parse("Foo {{{**no**wiki}}}");
+        $this->assertEquals(new Document(new Paragraph(array(new Text('Foo '), new NoWikiInline(array(new Text('**'), new Text('no'), new Text('**'), new Text('wiki')))))), $doc);
+        
+        $doc = $parser->parse("Foo {{{**no**wiki\n}}}");
+        $this->assertEquals(new Document(new Paragraph(array(new Text('Foo '), new NoWikiInline(array(new Text('**'), new Text('no'), new Text('**'), new Text('wiki'), new Text("\n")))))), $doc);
+
+        $doc = $parser->parse("Foo\n{{{**no**wiki\n}}}");
+        $this->assertEquals(new Document(array(new Paragraph(array(new Text('Foo'), new Text(' '))), new NoWiki(array(new Text('**'), new Text('no'), new Text('**'), new Text('wiki'), new Text("\n"))))), $doc);
+    }
+    
+    public function testHorizontalRule()
+    {
+        $parser = new Parser();
+        
+        $doc = $parser->parse("----");
+        $this->assertEquals(new Document(new HorizontalRule()), $doc);
+        
+        $doc = $parser->parse("pre\n----\npost");
+        $this->assertEquals(new Document(array(new Paragraph(array(new Text('pre'), new Text(' '))), new HorizontalRule(), new Paragraph(new Text('post')))), $doc);
+        
+        $doc = $parser->parse("pre\n\n----\n\npost");
+        
+        $this->assertEquals(new Document(array(new Paragraph(array(new Text('pre'))), new HorizontalRule(), new Paragraph(new Text('post')))), $doc);
     }
 }
