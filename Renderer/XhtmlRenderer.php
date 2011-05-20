@@ -68,7 +68,11 @@ class XhtmlRenderer implements RendererInterface
         } else if ($element instanceof Italic) {
             return sprintf('<em>%s</em>', $this->render($element->getChildren()));
         } else if ($element instanceof Link) {
-            return sprintf('<a href="%s">%s</a>', $element->getDestination(), $this->render($element->getChildren()));
+            if ($element->getHasSpecialPresentation()) {
+                return sprintf('<a href="%s">%s</a>', trim($element->getDestination()), trim($this->render($element->getChildren())));
+            } else {
+                return sprintf('<a href="%s">%s</a>', trim($element->getDestination()), trim($element->getDestination()));
+            }
         } else if ($element instanceof Table) {
             return sprintf("<table>\n%s\n</table>\n", trim($this->render($element->getChildren())));
         } else if ($element instanceof TableRow) {

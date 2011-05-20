@@ -84,7 +84,11 @@ EOF;
         } else if ($element instanceof Italic) {
             return sprintf('\textit{%s}', $this->render($element->getChildren()));
         } else if ($element instanceof Link) {
-            return sprintf('%s\footnote{%s}', $this->render($element->getChildren()), $element->getDestination());
+            if ($element->getHasSpecialPresentation()) {
+                return sprintf('%s\footnote{%s}', $this->render($element->getChildren()), trim($element->getDestination()));
+            } else {
+                return sprintf('%s\footnote{%s}', trim($element->getDestination()), trim($element->getDestination()));
+            }
         } else if ($element instanceof Table) {
             return '[Table not supported yet]';
         } else {
