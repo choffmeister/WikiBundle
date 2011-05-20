@@ -74,7 +74,9 @@ class Parser
             } else if ($current instanceof TableCell || $current instanceof TableCellHead) {
                 $this->parseStateTableCell($stack, $tokens, $i);
             } else {
-                $i++;
+                // @codeCoverageIgnoreStart
+                throw new \Exception('The impossible happened');
+                // @codeCoverageIgnoreEnd
             }
         }
         
