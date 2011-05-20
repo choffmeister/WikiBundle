@@ -455,8 +455,11 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(new Document(new Paragraph(array(new Text('Foo '), new NoWikiInline(array(new Text('**'), new Text('no'), new Text('**'), new Text('wiki')))))), $doc);
         
         $doc = $parser->parse("Foo {{{**no**wiki\n}}}");
-        $this->assertEquals(new Document(new Paragraph(array(new Text('Foo '), new NoWikiInline(array(new Text('**'), new Text('no'), new Text('**'), new Text('wiki'), new Text("\n")))))), $doc);
+        $this->assertEquals(new Document(new Paragraph(array(new Text('Foo '), new NoWikiInline(array(new Text('**'), new Text('no'), new Text('**'), new Text('wiki'), new Text(" ")))))), $doc);
 
+        $doc = $parser->parse("Foo {{{**no**wiki\nasd}}}");
+        $this->assertEquals(new Document(new Paragraph(array(new Text('Foo '), new NoWikiInline(array(new Text('**'), new Text('no'), new Text('**'), new Text('wiki'), new Text(" "), new Text("asd")))))), $doc);
+        
         $doc = $parser->parse("Foo\n{{{**no**wiki\n}}}");
         $this->assertEquals(new Document(array(new Paragraph(array(new Text('Foo'), new Text(' '))), new NoWiki(array(new Text('**'), new Text('no'), new Text('**'), new Text('wiki'), new Text("\n"))))), $doc);
     }
