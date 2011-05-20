@@ -263,6 +263,7 @@ class Parser
         
         switch ($type) {
             case Lexer::T_NEWLINE:
+                $current->addChild(new Text(' '));
                 $i++;
                 break;
             case Lexer::T_LIST_BULLET_ITEM:
