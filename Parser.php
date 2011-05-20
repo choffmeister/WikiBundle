@@ -463,10 +463,6 @@ class Parser
                 $stack->push($tableCellHead);
                 $i++;
                 break;
-            case Lexer::T_EMPTYLINE:
-            case Lexer::T_NEWLINE:
-                $stack->pop();
-                break;
             default:
                 $stack->pop();
                 break;
