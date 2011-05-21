@@ -21,7 +21,7 @@ use Thekwasti\WikiBundle\Tree\Text;
  */
 class DebugRenderer implements RendererInterface
 {
-    public function render($element)
+    public function render($element, $currentWiki = null)
     {
         return $this->renderRecursion($element);
     }
