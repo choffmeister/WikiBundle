@@ -11,6 +11,7 @@
 
 namespace Thekwasti\WikiBundle;
 
+use Thekwasti\WikiBundle\Tree\LineBreak;
 use Thekwasti\WikiBundle\Tree\TableRow;
 use Thekwasti\WikiBundle\Tree\TableCellHead;
 use Thekwasti\WikiBundle\Tree\TableCell;
@@ -90,7 +91,34 @@ class Parser
             }
         }
         
-        return $doc;
+        return $this->postProcess($doc);
+    }
+    
+    private function postProcess(NodeInterface $node)
+    {
+        if ($node instanceof Headline) {
+            $node->setText(preg_replace('/(^[=\s]*)|([=\s]*$)/', '', $node->getText()));
+        }
+        
+        if (count($node->getChildren()) > 0) {
+            $children = $node->getChildren();
+            $i = 0;
+            
+            while ($i < count($children)) {
+                if ($i < count($children) - 1 && $children[$i] instanceof Text && $children[$i + 1] instanceof Text) {
+                    $children[$i]->setText($children[$i]->getText() . $children[$i + 1]->getText());
+                    unset($children[$i + 1]);
+                    $children = array_values($children);
+                } else {
+                    $this->postProcess($children[$i]);
+                    $i++;
+                }
+            }
+
+            $node->setChildren($children);
+        }
+        
+        return $node;
     }
     
     private function parseStateDocument(Stack $stack, array $tokens, &$i)
@@ -180,7 +208,8 @@ class Parser
                 $i++;
                 break;
             default:
-                $this->parseStateInline($stack, $tokens, $i);
+                $current->setText($current->getText() . $value);
+                $i++;
                 break;
         }
     }
@@ -496,12 +525,8 @@ class Parser
         
         switch ($type) {
             case Lexer::T_NEWLINE:
-                if (!$stack->has(function($element) { return $element instanceof Headline; })) {
-                    $current->addChild(new Text(' '));
-                    $i++;
-                } else {
-                    $stack->pop();
-                }
+                $current->addChild(new Text(' '));
+                $i++;
                 break;
             case Lexer::T_BOLD:
                 if (!$stack->has(function($element) { return $element instanceof Bold; })) {
