@@ -43,16 +43,16 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(new Document(new Paragraph(array(new Text('foo')))), $doc); 
         
         $doc = $parser->parse("foo\n");
-        $this->assertEquals(new Document(new Paragraph(array(new Text('foo'), new Text(' ')))), $doc); 
+        $this->assertEquals(new Document(new Paragraph(array(new Text('foo ')))), $doc); 
         
         $doc = $parser->parse("foo\n\n");
-        $this->assertEquals(new Document(new Paragraph(array(new Text('foo'), new Text(' ')))), $doc); 
+        $this->assertEquals(new Document(new Paragraph(array(new Text('foo ')))), $doc); 
 
         $doc = $parser->parse("foo\n\n\n\n\n");
-        $this->assertEquals(new Document(new Paragraph(array(new Text('foo'), new Text(' ')))), $doc); 
+        $this->assertEquals(new Document(new Paragraph(array(new Text('foo ')))), $doc); 
         
         $doc = $parser->parse("foo\nfoo2");
-        $this->assertEquals(new Document(new Paragraph(array(new Text('foo'), new Text(' '), new Text('foo2')))), $doc); 
+        $this->assertEquals(new Document(new Paragraph(array(new Text('foo foo2')))), $doc); 
         
         $doc = $parser->parse("foo\n\nfoo2");
         $this->assertEquals(new Document(array(new Paragraph(new Text('foo')), new Paragraph(new Text('foo2')))), $doc); 
@@ -61,16 +61,16 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(new Document(array(new Paragraph(new Text('foo')), new Paragraph(new Text('foo2')))), $doc); 
         
         $doc = $parser->parse("foo\n*A");
-        $this->assertEquals(new Document(array(new Paragraph(array(new Text('foo'), new Text(' '))), new UnorderedList(1, new ListItem(new Text('A'))))), $doc); 
+        $this->assertEquals(new Document(array(new Paragraph(array(new Text('foo '))), new UnorderedList(1, new ListItem(new Text('A'))))), $doc); 
 
         $doc = $parser->parse("foo\n##A");
-        $this->assertEquals(new Document(array(new Paragraph(array(new Text('foo'), new Text(' '))), new OrderedList(2, new ListItem(new Text('A'))))), $doc);
+        $this->assertEquals(new Document(array(new Paragraph(array(new Text('foo '))), new OrderedList(2, new ListItem(new Text('A'))))), $doc);
         
         $doc = $parser->parse("foo\n|=A");
-        $this->assertEquals(new Document(array(new Paragraph(array(new Text('foo'), new Text(' '))), new Table(new TableRow(new TableCellHead(new Text('A')))))), $doc); 
+        $this->assertEquals(new Document(array(new Paragraph(array(new Text('foo '))), new Table(new TableRow(new TableCellHead(new Text('A')))))), $doc); 
 
         $doc = $parser->parse("foo\n{{{\nA");
-        $this->assertEquals(new Document(array(new Paragraph(array(new Text('foo'), new Text(' '))), new NoWiki(array(new Text("\n"), new Text('A'))))), $doc); 
+        $this->assertEquals(new Document(array(new Paragraph(array(new Text('foo '))), new NoWiki(array(new Text("\nA"))))), $doc); 
     }
     
     public function testHeadline()
@@ -111,7 +111,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(new Document(array(new Headline(3, 'Headline'), new Paragraph(new Text('Foo')))), $doc);
         
         $doc = $parser->parse("d=== Headline\nFoo");
-        $this->assertEquals(new Document(array(new Paragraph(array(new Text('d=== Headline'), new Text(' '), new Text('Foo'))))), $doc);
+        $this->assertEquals(new Document(array(new Paragraph(array(new Text('d=== Headline Foo'))))), $doc);
         
         $doc = $parser->parse("=== Headline=");
         $this->assertEquals(new Document(array(new Headline(3, 'Headline'))), $doc);
@@ -151,7 +151,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(new Document(new Paragraph(array(new Text('Hello '), new Bold(new Text('fold')), new Text(' asd')))), $doc);
         
         $doc = $parser->parse("Hello **fold\nasd**");
-        $this->assertEquals(new Document(new Paragraph(array(new Text('Hello '), new Bold(array(new Text('fold'), new Text(' '), new Text('asd')))))), $doc);
+        $this->assertEquals(new Document(new Paragraph(array(new Text('Hello '), new Bold(array(new Text('fold asd')))))), $doc);
         
         $doc = $parser->parse("Hello **fold\n\nasd**");
         $this->assertEquals(new Document(array(new Paragraph(array(new Text('Hello '), new Bold(new Text('fold')))), new Paragraph(array(new Text('asd'), new Bold())))), $doc);
@@ -168,7 +168,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(new Document(new Paragraph(array(new Text('Hello '), new Italic(new Text('fold')), new Text(' asd')))), $doc);
         
         $doc = $parser->parse("Hello //fold\nasd//");
-        $this->assertEquals(new Document(new Paragraph(array(new Text('Hello '), new Italic(array(new Text('fold'), new Text(' '), new Text('asd')))))), $doc);
+        $this->assertEquals(new Document(new Paragraph(array(new Text('Hello '), new Italic(array(new Text('fold asd')))))), $doc);
         
         $doc = $parser->parse("Hello //fold\n\nasd//");
         $this->assertEquals(new Document(array(new Paragraph(array(new Text('Hello '), new Italic(new Text('fold')))), new Paragraph(array(new Text('asd'), new Italic())))), $doc);
@@ -234,25 +234,25 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $parser = new Parser();
         
         $doc = $parser->parse("* First\n*Second\n*Third");
-        $this->assertEquals(new Document(new UnorderedList(1, array(new ListItem(array(new Text(' First'), new Text(' '))), new ListItem(array(new Text('Second'), new Text(' '))), new ListItem(array(new Text('Third')))))), $doc);
+        $this->assertEquals(new Document(new UnorderedList(1, array(new ListItem(array(new Text(' First '))), new ListItem(array(new Text('Second '))), new ListItem(array(new Text('Third')))))), $doc);
         
         $doc = $parser->parse("asdsad\n* First\n*Second\n*Third");
-        $this->assertEquals(new Document(array(new Paragraph(array(new Text('asdsad'), new Text(' '))), new UnorderedList(1, array(new ListItem(array(new Text(' First'), new Text(' '))), new ListItem(array(new Text('Second'), new Text(' '))), new ListItem(array(new Text('Third'))))))), $doc);
+        $this->assertEquals(new Document(array(new Paragraph(array(new Text('asdsad '))), new UnorderedList(1, array(new ListItem(array(new Text(' First '))), new ListItem(array(new Text('Second '))), new ListItem(array(new Text('Third'))))))), $doc);
         
         $doc = $parser->parse("* First\n*Second\n*Third\n\nasdsad");
-        $this->assertEquals(new Document(array(new UnorderedList(1, array(new ListItem(array(new Text(' First'), new Text(' '))), new ListItem(array(new Text('Second'), new Text(' '))), new ListItem(array(new Text('Third'))))), new Paragraph(new Text('asdsad')))), $doc);
+        $this->assertEquals(new Document(array(new UnorderedList(1, array(new ListItem(array(new Text(' First '))), new ListItem(array(new Text('Second '))), new ListItem(array(new Text('Third'))))), new Paragraph(new Text('asdsad')))), $doc);
         
         $doc = $parser->parse("* First\n*Second\nSecondB\n*Third");
-        $this->assertEquals(new Document(new UnorderedList(1, array(new ListItem(array(new Text(' First'), new Text(' '))), new ListItem(array(new Text('Second'), new Text(' '), new Text('SecondB'), new Text(' '))), new ListItem(new Text('Third'))))), $doc);
+        $this->assertEquals(new Document(new UnorderedList(1, array(new ListItem(array(new Text(' First '))), new ListItem(array(new Text('Second SecondB '))), new ListItem(new Text('Third'))))), $doc);
 
         $doc = $parser->parse("*1\n*2\n**2a\n**2b\n*3");
         $this->assertEquals(new Document(
             new UnorderedList(1, array(
-                new ListItem(array(new Text('1'), new Text(' '))),
-                new ListItem(array(new Text('2'), new Text(' '))),
+                new ListItem(array(new Text('1 '))),
+                new ListItem(array(new Text('2 '))),
                 new UnorderedList(2, array(
-                    new ListItem(array(new Text('2a'), new Text(' '))),
-                    new ListItem(array(new Text('2b'), new Text(' '))),
+                    new ListItem(array(new Text('2a '))),
+                    new ListItem(array(new Text('2b '))),
                 )),
                 new ListItem(array(new Text('3')))
             ))
@@ -261,13 +261,13 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $doc = $parser->parse("*1\n*2\n**2a\n**2b\n***Deep\n*3");
         $this->assertEquals(new Document(
             new UnorderedList(1, array(
-                new ListItem(array(new Text('1'), new Text(' '))),
-                new ListItem(array(new Text('2'), new Text(' '))),
+                new ListItem(array(new Text('1 '))),
+                new ListItem(array(new Text('2 '))),
                 new UnorderedList(2, array(
-                    new ListItem(array(new Text('2a'), new Text(' '))),
-                    new ListItem(array(new Text('2b'), new Text(' '))),
+                    new ListItem(array(new Text('2a '))),
+                    new ListItem(array(new Text('2b '))),
                     new UnorderedList(3, array(
-                        new ListItem(array(new Text('Deep'), new Text(' '))),
+                        new ListItem(array(new Text('Deep '))),
                     )),
                 )),
                 new ListItem(array(new Text('3')))
@@ -277,13 +277,13 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $doc = $parser->parse("*1\n*2\n**2a\n**2b\n***Deep\n**2c");
         $this->assertEquals(new Document(
             new UnorderedList(1, array(
-                new ListItem(array(new Text('1'), new Text(' '))),
-                new ListItem(array(new Text('2'), new Text(' '))),
+                new ListItem(array(new Text('1 '))),
+                new ListItem(array(new Text('2 '))),
                 new UnorderedList(2, array(
-                    new ListItem(array(new Text('2a'), new Text(' '))),
-                    new ListItem(array(new Text('2b'), new Text(' '))),
+                    new ListItem(array(new Text('2a '))),
+                    new ListItem(array(new Text('2b '))),
                     new UnorderedList(3, array(
-                        new ListItem(array(new Text('Deep'), new Text(' '))),
+                        new ListItem(array(new Text('Deep '))),
                     )),
                     new ListItem(array(new Text('2c'))),
                 )),
@@ -296,25 +296,25 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $parser = new Parser();
         
         $doc = $parser->parse("# First\n#Second\n#Third");
-        $this->assertEquals(new Document(new OrderedList(1, array(new ListItem(array(new Text(' First'), new Text(' '))), new ListItem(array(new Text('Second'), new Text(' '))), new ListItem(array(new Text('Third')))))), $doc);
+        $this->assertEquals(new Document(new OrderedList(1, array(new ListItem(array(new Text(' First '))), new ListItem(array(new Text('Second '))), new ListItem(array(new Text('Third')))))), $doc);
         
         $doc = $parser->parse("asdsad\n# First\n#Second\n#Third");
-        $this->assertEquals(new Document(array(new Paragraph(array(new Text('asdsad'), new Text(' '))), new OrderedList(1, array(new ListItem(array(new Text(' First'), new Text(' '))), new ListItem(array(new Text('Second'), new Text(' '))), new ListItem(array(new Text('Third'))))))), $doc);
+        $this->assertEquals(new Document(array(new Paragraph(array(new Text('asdsad '))), new OrderedList(1, array(new ListItem(array(new Text(' First '))), new ListItem(array(new Text('Second '))), new ListItem(array(new Text('Third'))))))), $doc);
         
         $doc = $parser->parse("# First\n#Second\n#Third\n\nasdsad");
-        $this->assertEquals(new Document(array(new OrderedList(1, array(new ListItem(array(new Text(' First'), new Text(' '))), new ListItem(array(new Text('Second'), new Text(' '))), new ListItem(array(new Text('Third'))))), new Paragraph(new Text('asdsad')))), $doc);
+        $this->assertEquals(new Document(array(new OrderedList(1, array(new ListItem(array(new Text(' First '))), new ListItem(array(new Text('Second '))), new ListItem(array(new Text('Third'))))), new Paragraph(new Text('asdsad')))), $doc);
         
         $doc = $parser->parse("# First\n#Second\nSecondB\n#Third");
-        $this->assertEquals(new Document(new OrderedList(1, array(new ListItem(array(new Text(' First'), new Text(' '))), new ListItem(array(new Text('Second'), new Text(' '), new Text('SecondB'), new Text(' '))), new ListItem(new Text('Third'))))), $doc);
+        $this->assertEquals(new Document(new OrderedList(1, array(new ListItem(array(new Text(' First '))), new ListItem(array(new Text('Second SecondB '))), new ListItem(new Text('Third'))))), $doc);
 
         $doc = $parser->parse("#1\n#2\n##2a\n##2b\n#3");
         $this->assertEquals(new Document(
             new OrderedList(1, array(
-                new ListItem(array(new Text('1'), new Text(' '))),
-                new ListItem(array(new Text('2'), new Text(' '))),
+                new ListItem(array(new Text('1 '))),
+                new ListItem(array(new Text('2 '))),
                 new OrderedList(2, array(
-                    new ListItem(array(new Text('2a'), new Text(' '))),
-                    new ListItem(array(new Text('2b'), new Text(' '))),
+                    new ListItem(array(new Text('2a '))),
+                    new ListItem(array(new Text('2b '))),
                 )),
                 new ListItem(array(new Text('3')))
             ))
@@ -323,13 +323,13 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $doc = $parser->parse("#1\n#2\n##2a\n##2b\n###Deep\n#3");
         $this->assertEquals(new Document(
             new OrderedList(1, array(
-                new ListItem(array(new Text('1'), new Text(' '))),
-                new ListItem(array(new Text('2'), new Text(' '))),
+                new ListItem(array(new Text('1 '))),
+                new ListItem(array(new Text('2 '))),
                 new OrderedList(2, array(
-                    new ListItem(array(new Text('2a'), new Text(' '))),
-                    new ListItem(array(new Text('2b'), new Text(' '))),
+                    new ListItem(array(new Text('2a '))),
+                    new ListItem(array(new Text('2b '))),
                     new OrderedList(3, array(
-                        new ListItem(array(new Text('Deep'), new Text(' '))),
+                        new ListItem(array(new Text('Deep '))),
                     )),
                 )),
                 new ListItem(array(new Text('3')))
@@ -339,13 +339,13 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $doc = $parser->parse("#1\n#2\n##2a\n##2b\n###Deep\n##2c");
         $this->assertEquals(new Document(
             new OrderedList(1, array(
-                new ListItem(array(new Text('1'), new Text(' '))),
-                new ListItem(array(new Text('2'), new Text(' '))),
+                new ListItem(array(new Text('1 '))),
+                new ListItem(array(new Text('2 '))),
                 new OrderedList(2, array(
-                    new ListItem(array(new Text('2a'), new Text(' '))),
-                    new ListItem(array(new Text('2b'), new Text(' '))),
+                    new ListItem(array(new Text('2a '))),
+                    new ListItem(array(new Text('2b '))),
                     new OrderedList(3, array(
-                        new ListItem(array(new Text('Deep'), new Text(' '))),
+                        new ListItem(array(new Text('Deep '))),
                     )),
                     new ListItem(array(new Text('2c'))),
                 )),
@@ -360,11 +360,11 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $doc = $parser->parse("*1\n*2\n#3\n#4\n*5");
         $this->assertEquals(new Document(array(
             new UnorderedList(1, array(
-                new ListItem(array(new Text('1'), new Text(' '))),
-                new ListItem(array(new Text('2'), new Text(' '))),
+                new ListItem(array(new Text('1 '))),
+                new ListItem(array(new Text('2 '))),
                 new OrderedList(1, array(
-                    new ListItem(array(new Text('3'), new Text(' '))),
-                    new ListItem(array(new Text('4'), new Text(' '))),
+                    new ListItem(array(new Text('3 '))),
+                    new ListItem(array(new Text('4 '))),
                 )),
                 new ListItem(array(new Text('5'))),
             )),
@@ -373,18 +373,18 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $doc = $parser->parse("*1\n*2\n#3\n#4\n##5\n##6\n**7\n***8\n##9");
         $this->assertEquals(new Document(array(
             new UnorderedList(1, array(
-                new ListItem(array(new Text('1'), new Text(' '))),
-                new ListItem(array(new Text('2'), new Text(' '))),
+                new ListItem(array(new Text('1 '))),
+                new ListItem(array(new Text('2 '))),
                 new OrderedList(1, array(
-                    new ListItem(array(new Text('3'), new Text(' '))),
-                    new ListItem(array(new Text('4'), new Text(' '))),
+                    new ListItem(array(new Text('3 '))),
+                    new ListItem(array(new Text('4 '))),
                     new OrderedList(2, array(
-                        new ListItem(array(new Text('5'), new Text(' '))),
-                        new ListItem(array(new Text('6'), new Text(' '))),
+                        new ListItem(array(new Text('5 '))),
+                        new ListItem(array(new Text('6 '))),
                         new UnorderedList(2, array(
-                            new ListItem(array(new Text('7'), new Text(' '))),
+                            new ListItem(array(new Text('7 '))),
                             new UnorderedList(3, array(
-                                new ListItem(array(new Text('8'), new Text(' '))),
+                                new ListItem(array(new Text('8 '))),
                             )),
                         )),
                         new ListItem(array(new Text('9'))),
@@ -396,11 +396,11 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $doc = $parser->parse("#1\n#2\n*3\n*4\n#5");
         $this->assertEquals(new Document(array(
             new OrderedList(1, array(
-                new ListItem(array(new Text('1'), new Text(' '))),
-                new ListItem(array(new Text('2'), new Text(' '))),
+                new ListItem(array(new Text('1 '))),
+                new ListItem(array(new Text('2 '))),
                 new UnorderedList(1, array(
-                    new ListItem(array(new Text('3'), new Text(' '))),
-                    new ListItem(array(new Text('4'), new Text(' '))),
+                    new ListItem(array(new Text('3 '))),
+                    new ListItem(array(new Text('4 '))),
                 )),
                 new ListItem(array(new Text('5'))),
             )),
@@ -409,18 +409,18 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $doc = $parser->parse("#1\n#2\n*3\n*4\n**5\n**6\n##7\n###8\n**9");
         $this->assertEquals(new Document(array(
             new OrderedList(1, array(
-                new ListItem(array(new Text('1'), new Text(' '))),
-                new ListItem(array(new Text('2'), new Text(' '))),
+                new ListItem(array(new Text('1 '))),
+                new ListItem(array(new Text('2 '))),
                 new UnorderedList(1, array(
-                    new ListItem(array(new Text('3'), new Text(' '))),
-                    new ListItem(array(new Text('4'), new Text(' '))),
+                    new ListItem(array(new Text('3 '))),
+                    new ListItem(array(new Text('4 '))),
                     new UnorderedList(2, array(
-                        new ListItem(array(new Text('5'), new Text(' '))),
-                        new ListItem(array(new Text('6'), new Text(' '))),
+                        new ListItem(array(new Text('5 '))),
+                        new ListItem(array(new Text('6 '))),
                         new OrderedList(2, array(
-                            new ListItem(array(new Text('7'), new Text(' '))),
+                            new ListItem(array(new Text('7 '))),
                             new OrderedList(3, array(
-                                new ListItem(array(new Text('8'), new Text(' '))),
+                                new ListItem(array(new Text('8 '))),
                             )),
                         )),
                         new ListItem(array(new Text('9'))),
@@ -495,7 +495,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         
         $doc = $parser->parse("pre\n|=H1|= H2 \n|1a|1b \n| 2a| 2b \npost");
         $this->assertEquals(new Document(array(
-            new Paragraph(array(new Text('pre'), new Text(' '))),
+            new Paragraph(array(new Text('pre '))),
             new Table(array(
                 new TableRow(array(
                     new TableCellHead(new Text('H1')),
@@ -515,7 +515,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         
         $doc = $parser->parse("pre\n|=H1|= H2 \n\n|1a|1b \n| 2a| 2b \npost");
         $this->assertEquals(new Document(array(
-            new Paragraph(array(new Text('pre'), new Text(' '))),
+            new Paragraph(array(new Text('pre '))),
             new Table(array(
                 new TableRow(array(
                     new TableCellHead(new Text('H1')),
@@ -541,22 +541,22 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $parser = new Parser();
         
         $doc = $parser->parse("{{{nowiki\n}}}");
-        $this->assertEquals(new Document(new NoWiki(array(new Text('nowiki'), new Text("\n")))), $doc);
+        $this->assertEquals(new Document(new NoWiki(array(new Text("nowiki\n")))), $doc);
         
         $doc = $parser->parse("{{{**no**wiki\n}}}");
-        $this->assertEquals(new Document(new NoWiki(array(new Text('**'), new Text('no'), new Text('**'), new Text('wiki'), new Text("\n")))), $doc);
+        $this->assertEquals(new Document(new NoWiki(array(new Text("**no**wiki\n")))), $doc);
 
         $doc = $parser->parse("Foo {{{**no**wiki}}}");
-        $this->assertEquals(new Document(new Paragraph(array(new Text('Foo '), new NoWikiInline(array(new Text('**'), new Text('no'), new Text('**'), new Text('wiki')))))), $doc);
+        $this->assertEquals(new Document(new Paragraph(array(new Text('Foo '), new NoWikiInline(array(new Text('**no**wiki')))))), $doc);
         
         $doc = $parser->parse("Foo {{{**no**wiki\n}}}");
-        $this->assertEquals(new Document(new Paragraph(array(new Text('Foo '), new NoWikiInline(array(new Text('**'), new Text('no'), new Text('**'), new Text('wiki'), new Text(" ")))))), $doc);
+        $this->assertEquals(new Document(new Paragraph(array(new Text('Foo '), new NoWikiInline(array(new Text('**no**wiki ')))))), $doc);
 
         $doc = $parser->parse("Foo {{{**no**wiki\nasd}}}");
-        $this->assertEquals(new Document(new Paragraph(array(new Text('Foo '), new NoWikiInline(array(new Text('**'), new Text('no'), new Text('**'), new Text('wiki'), new Text(" "), new Text("asd")))))), $doc);
+        $this->assertEquals(new Document(new Paragraph(array(new Text('Foo '), new NoWikiInline(array(new Text('**no**wiki asd')))))), $doc);
         
         $doc = $parser->parse("Foo\n{{{**no**wiki\n}}}");
-        $this->assertEquals(new Document(array(new Paragraph(array(new Text('Foo'), new Text(' '))), new NoWiki(array(new Text('**'), new Text('no'), new Text('**'), new Text('wiki'), new Text("\n"))))), $doc);
+        $this->assertEquals(new Document(array(new Paragraph(array(new Text('Foo '))), new NoWiki(array(new Text("**no**wiki\n"))))), $doc);
     }
     
     public function testHorizontalRule()
@@ -567,7 +567,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(new Document(new HorizontalRule()), $doc);
         
         $doc = $parser->parse("pre\n----\npost");
-        $this->assertEquals(new Document(array(new Paragraph(array(new Text('pre'), new Text(' '))), new HorizontalRule(), new Paragraph(new Text('post')))), $doc);
+        $this->assertEquals(new Document(array(new Paragraph(array(new Text('pre '))), new HorizontalRule(), new Paragraph(new Text('post')))), $doc);
         
         $doc = $parser->parse("pre\n\n----\n\npost");
         
