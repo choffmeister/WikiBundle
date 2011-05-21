@@ -86,7 +86,7 @@ class Parser
                 $this->parseStateTableCell($stack, $tokens, $i);
             } else {
                 // @codeCoverageIgnoreStart
-                throw new \Exception('The impossible happened');
+                throw new \Exception(sprintf('Unsupported element of type %s', gettype($current) == 'object' ? get_class($current) : gettype($current)));
                 // @codeCoverageIgnoreEnd
             }
         }
