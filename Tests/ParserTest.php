@@ -468,6 +468,9 @@ class ParserTest extends \PHPUnit_Framework_TestCase
             ), true),
             new Text('4'),
         ))), $doc);
+        
+        $doc = $parser->parse('Foo]]Do');
+        $this->assertEquals(new Document(new Paragraph(new Text('Foo]]Do'))), $doc);
     }
     
     public function testTable()
