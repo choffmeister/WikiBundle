@@ -31,6 +31,13 @@ Following markup is missing by now:
 * [Images][2]: Will follow soon
 * [Placeholder][3]: Not sure if I want to implement it
 
+The `LatexRenderer` has deactivated features:
+
+* Tables (their is still some issue with pdflatex - so
+deactivated by now)
+* Italic, Bold (pdflatex does not allow italic or bold span over
+two paragraphs - so deactivated by now)
+
 [1]: http://www.wikicreole.org/wiki/Creole1.0
 [2]: http://www.wikicreole.org/wiki/Creole1.0#section-Creole1.0-ImageInline
 [3]: http://www.wikicreole.org/wiki/Creole1.0#section-Creole1.0-Placeholder
