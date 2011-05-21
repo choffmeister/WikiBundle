@@ -44,6 +44,8 @@ class RandomMarkupGenerator extends \PHPUnit_Framework_TestCase
             "{{{",
             "}}}",
             "|",
+            "\n----\n",
+            "----",
         );
         $this->snippetCount = count($this->snippets);
     }
