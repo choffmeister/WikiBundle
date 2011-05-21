@@ -123,7 +123,9 @@ EOF;
         } else if ($element instanceof Table) {
             return '';
         } else {
+            // @codeCoverageIgnoreStart
             throw new \Exception(sprintf('Unsupported element of type %s', gettype($element) == 'object' ? get_class($element) : gettype($element)));
+            // @codeCoverageIgnoreEnd
         }
     }
     

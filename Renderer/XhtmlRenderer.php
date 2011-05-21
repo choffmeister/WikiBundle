@@ -110,7 +110,9 @@ class XhtmlRenderer implements RendererInterface
         } else if ($element instanceof TableCellHead) {
             return sprintf("<th>%s</th>\n", trim($this->render($element->getChildren())));
         } else {
+            // @codeCoverageIgnoreStart
             throw new \Exception(sprintf('Unsupported element of type %s', gettype($element) == 'object' ? get_class($element) : gettype($element)));
+            // @codeCoverageIgnoreEnd
         }
     }
     
