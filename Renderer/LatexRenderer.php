@@ -143,8 +143,10 @@ EOF;
                 case '{': return '\{{}';
                 case '}': return '\}{}';
                 case '#': return '\#{}';
+                // @codeCoverageIgnoreStart
                 default: throw new \Exception();
             }
+            // @codeCoverageIgnoreEnd
         }, $string);
     }
 }
