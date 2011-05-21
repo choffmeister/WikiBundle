@@ -528,6 +528,10 @@ class Parser
                 $current->addChild(new Text(' '));
                 $i++;
                 break;
+            case Lexer::T_ESCAPER:
+                $current->addChild(new Text($value[1]));
+                $i++;
+                break;
             case Lexer::T_BOLD:
                 if (!$stack->has(function($element) { return $element instanceof Bold; })) {
                     $bold = new Bold();

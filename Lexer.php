@@ -18,6 +18,7 @@ namespace Thekwasti\WikiBundle;
 class Lexer
 {
     const T_TEXT = 1;
+    const T_ESCAPER = 2;
     const T_NEWLINE = 10;
     const T_EMPTYLINE = 11;
     const T_PIPE = 20;
@@ -38,6 +39,7 @@ class Lexer
     private $patterns = array(
         "\n{2,}",
         "\n",
+        '~.',
         '^=+',
         '^\*+',
         '^\#+',
@@ -62,7 +64,7 @@ class Lexer
         $markup = str_replace("\r\n", "\n", $markup);
         $markup = preg_replace("/^\s*$/m", "", $markup);
         
-        $regex = '~(' . implode(')|(', $this->patterns) . ')~im';
+        $regex = ';(' . implode(')|(', $this->patterns) . ');im';
         $flags = PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_OFFSET_CAPTURE;
         $matches = preg_split($regex, $markup, -1, $flags);
         
@@ -91,6 +93,8 @@ class Lexer
             return self::T_NEWLINE;
         } else if (preg_match("/^\n{2,}$/", $value)) {
             return self::T_EMPTYLINE;
+        } else if (strlen($value) == 2 && $value[0] == '~') {
+            return self::T_ESCAPER;
         } else if ($isLineBeginning && $value[0] == '=') {
             return self::T_HEADLINE;
         } else if ($isLineBeginning && $value[0] == '*') {
