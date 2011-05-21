@@ -51,10 +51,12 @@ class LatexRenderer implements RendererInterface
 \pagestyle{myheadings}
 \markright{Document}
 \begin{document}
+
 EOF;
 
     protected $documentPost = <<<EOF
 \end{document}
+
 EOF;
 
     private $urlGenerator;
@@ -127,12 +129,20 @@ EOF;
     
     public function escape($string)
     {
-        $specialchars = '\$%^&_{}#~';
-        $escaper = "\\";
-        
-        for ($i = 0; $i < 10; $i++)
-            $string = str_replace($specialchars[$i], $escaper . $specialchars[$i], $string);
-            
-        return $string;
+        return preg_replace_callback('/(\\\\|\$|%|\^|&|_|\{|\}|#|~)/', function ($char) {
+            switch ($char[1]) {
+                case "\\": return '\textbackslash{}';
+                case '~': return '\~{}';
+                case '$': return '\textdollar{}';
+                case '%': return '\%{}';
+                case '^': return '\^{}';
+                case '&': return '\&{}';
+                case '_': return '\_{}';
+                case '{': return '\{{}';
+                case '}': return '\}{}';
+                case '#': return '\#{}';
+                default: throw new \Exception();
+            }
+        }, $string);
     }
 }

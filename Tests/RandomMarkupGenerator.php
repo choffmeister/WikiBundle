@@ -13,13 +13,20 @@ class RandomMarkupGenerator extends \PHPUnit_Framework_TestCase
     public function __construct()
     {
         $this->tempName = 'thekwasti_wikibundle_pdflatex_fuzy_test';
+        
+        /*
+        // full utf-8 alphabet
         $this->alphabet = '';
         for ($i = 0; $i < 0xD800; $i++)
             $this->alphabet .= iconv('UCS-4LE', 'UTF-8', pack('V', $i));
         for ($i = 0xE000; $i < 0xFFFF; $i++)
             $this->alphabet .= iconv('UCS-4LE', 'UTF-8', pack('V', $i));
+        */
             
-        $this->alphabet = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_.,#'\"+*-\n";
+        $this->alphabet  = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $this->alphabet .= '+*-/';
+        $this->alphabet .= '.!?,;:-';
+        $this->alphabet .= '\$%^&_{}#~';
         
         $this->alphabetSize = strlen($this->alphabet);
         $this->snippets = array(
@@ -30,6 +37,7 @@ class RandomMarkupGenerator extends \PHPUnit_Framework_TestCase
             "]]",
             "|",
             "**",
+            "\\\\",
             "//",
             "\n",
             "\n\n",
