@@ -6,7 +6,7 @@ class Text extends Leaf
 {
     private $text;
     
-    public function __construct($text)
+    public function __construct($text = '')
     {
         if (!is_string($text)) {
             throw new \InvalidArgumentException('$text must be a string');
