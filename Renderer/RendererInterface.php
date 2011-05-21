@@ -24,8 +24,8 @@ interface RendererInterface
      * Renders a single element or an array of elements.
      * 
      * @param NodeInterface|array $element An NodeInterface or an array of NodeInterface objects
-     * 
+     * @param string|null $currentWiki The name of the current wiki (needed for link url generation)
      * @return string The rendered string
      */
-    function render($element);
+    function render($element, $currentWiki = null);
 }
