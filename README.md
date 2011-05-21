@@ -23,6 +23,16 @@ a column of type `Object`). Once you need to render the markup
 you can just deserialize the tree (which is way faster) and then
 render it directly without a need to reparse it.
 
+Reliability
+-----------
+
+This bundle is unit tested with 100% code coverage. The `Parser`
+is tested with lots of special testcase to ensure the correct
+Wiki markup interpretation. In addition their is random markup
+generated and tests check if their occur any errors.
+This random markup is parse, rendered to latex code and then
+passed to `pdflatex` to avoid PDF build errors.
+
 To do
 -----
 
