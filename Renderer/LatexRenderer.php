@@ -29,7 +29,6 @@ use Thekwasti\WikiBundle\Tree\HorizontalRule;
 use Thekwasti\WikiBundle\Tree\Link;
 use Thekwasti\WikiBundle\Tree\Italic;
 use Thekwasti\WikiBundle\Tree\Bold;
-use Thekwasti\WikiBundle\Tree\EmptyLine;
 use Thekwasti\WikiBundle\Tree\NodeInterface;
 use Thekwasti\WikiBundle\Tree\Headline;
 use Thekwasti\WikiBundle\Tree\Chain;
@@ -97,8 +96,6 @@ EOF;
             return sprintf('%s', $this->render($element->getChildren()));
         } else if ($element instanceof Text) {
             return $this->escape($element->getText());
-        } else if ($element instanceof EmptyLine) {
-            return "\n\n";
         } else if ($element instanceof Headline) {
             $level = $element->getLevel() - 1;
             if ($level > 2) $level = 2;

@@ -29,7 +29,6 @@ use Thekwasti\WikiBundle\Tree\HorizontalRule;
 use Thekwasti\WikiBundle\Tree\Link;
 use Thekwasti\WikiBundle\Tree\Italic;
 use Thekwasti\WikiBundle\Tree\Bold;
-use Thekwasti\WikiBundle\Tree\EmptyLine;
 use Thekwasti\WikiBundle\Tree\NodeInterface;
 use Thekwasti\WikiBundle\Tree\Headline;
 use Thekwasti\WikiBundle\Tree\Chain;
@@ -80,8 +79,6 @@ class XhtmlRenderer implements RendererInterface
             return sprintf('<tt>%s</tt>', $this->render($element->getChildren()));
         } else if ($element instanceof Text) {
             return $this->escape($element->getText());
-        } else if ($element instanceof EmptyLine) {
-            return "\n<br/><br/>\n";
         } else if ($element instanceof Headline) {
             return sprintf("<h%d>%s</h%d>\n",
                 $element->getLevel(),
