@@ -573,4 +573,33 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         
         $this->assertEquals(new Document(array(new Paragraph(array(new Text('pre'))), new HorizontalRule(), new Paragraph(new Text('post')))), $doc);
     }
+    
+    public function testEscaping()
+    {
+        $parser = new Parser();
+        
+        $doc = $parser->parse('= Head');
+        $this->assertEquals(new Document(new Headline(1, 'Head')), $doc);
+        
+        $doc = $parser->parse('~= Head');
+        $this->assertEquals(new Document(new Paragraph(new Text('= Head'))), $doc);
+        
+        $doc = $parser->parse('==~ Head');
+        $this->assertEquals(new Document(new Headline(2, '~ Head')), $doc);
+        
+        $doc = $parser->parse("Hello ~**fold**");
+        $this->assertEquals(new Document(new Paragraph(array(new Text('Hello **fold'), new Bold()))), $doc);
+        
+        $doc = $parser->parse("Hello ~~**fold**");
+        $this->assertEquals(new Document(new Paragraph(array(new Text('Hello ~'), new Bold(new Text('fold'))))), $doc);
+        
+        $doc = $parser->parse("{{{nowiki\n}}}");
+        $this->assertEquals(new Document(new NoWiki(array(new Text("nowiki\n")))), $doc);
+        
+        $doc = $parser->parse("~{{{nowiki\n}}}");
+        $this->assertEquals(new Document(new Paragraph(new Text('{{{nowiki }}}'))), $doc);
+        
+        $doc = $parser->parse("{{{~nowiki\n}}}");
+        $this->assertEquals(new Document(new NoWiki(array(new Text("~nowiki\n")))), $doc);
+    }
 }
