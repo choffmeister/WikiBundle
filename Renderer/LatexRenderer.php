@@ -38,6 +38,7 @@ use Thekwasti\WikiBundle\Tree\Text;
 /**
  * LatexRenderer
  * 
+ * @todo Support tables, bold, italic, tt
  * @author Christian Hoffmeister <choffmeister.github@googlemail.com>
  */
 class LatexRenderer implements RendererInterface
@@ -88,9 +89,9 @@ EOF;
         } else if ($element instanceof ListItem) {
             return sprintf("\\item %s\n", trim($this->render($element->getChildren())));
         } else if ($element instanceof NoWiki) {
-            return sprintf("\texttt{%s}\n", $this->render($element->getChildren()));
+            return sprintf("%s\n", $this->render($element->getChildren()));
         } else if ($element instanceof NoWikiInline) {
-            return sprintf('\texttt{%s}', $this->render($element->getChildren()));
+            return sprintf('%s', $this->render($element->getChildren()));
         } else if ($element instanceof Text) {
             return $this->escape($element->getText());
         } else if ($element instanceof EmptyLine) {
@@ -106,9 +107,9 @@ EOF;
         } else if ($element instanceof HorizontalRule) {
             return "\n\\begin{center}\\rule{0.5\\textwidth}{0.5pt}\\end{center}\n";
         } else if ($element instanceof Bold) {
-            return sprintf('\textbf{%s}', $this->render($element->getChildren()));
+            return sprintf('%s', $this->render($element->getChildren()));
         } else if ($element instanceof Italic) {
-            return sprintf('\textit{%s}', $this->render($element->getChildren()));
+            return sprintf('%s', $this->render($element->getChildren()));
         } else if ($element instanceof Link) {
             $url = $this->urlGenerator->generateUrl($element);
             
@@ -118,7 +119,7 @@ EOF;
                 return sprintf('%s\footnote{%s}', $this->escape(trim($element->getDestination())), $this->escape($url));
             }
         } else if ($element instanceof Table) {
-            return '[Table not supported yet]';
+            return '';
         } else {
             throw new \Exception(sprintf('Unsupported element of type %s', gettype($element) == 'object' ? get_class($element) : gettype($element)));
         }
