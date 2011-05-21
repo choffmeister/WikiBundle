@@ -101,7 +101,7 @@ EOF;
             
             return sprintf("\\%ssection{%s}\n",
                 str_repeat('sub', $level),
-                trim($this->render($element->getChildren()))
+                trim($this->escape($element->getText()))
             );
         } else if ($element instanceof HorizontalRule) {
             return "\n\\begin{center}\\rule{0.5\\textwidth}{0.5pt}\\end{center}\n";
