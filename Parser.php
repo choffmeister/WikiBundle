@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of WikiBundle
+ *
+ * (c) Christian Hoffmeister <choffmeister.github@googlemail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Thekwasti\WikiBundle;
 
 use Thekwasti\WikiBundle\Tree\TableRow;
@@ -21,6 +30,11 @@ use Thekwasti\WikiBundle\Tree\Text;
 use Thekwasti\WikiBundle\Tree\Document;
 use Thekwasti\WikiBundle\Tree\NodeInterface;
 
+/**
+ * Parser
+ * 
+ * @author Christian Hoffmeister <choffmeister.github@googlemail.com>
+ */
 class Parser
 {
     public function __construct()

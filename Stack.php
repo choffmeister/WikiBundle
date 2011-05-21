@@ -1,7 +1,21 @@
 <?php
 
+/*
+ * This file is part of WikiBundle
+ *
+ * (c) Christian Hoffmeister <choffmeister.github@googlemail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Thekwasti\WikiBundle;
 
+/**
+ * Stack
+ * 
+ * @author Christian Hoffmeister <choffmeister.github@googlemail.com>
+ */
 class Stack implements \Countable, \IteratorAggregate
 {
     private $stack = array();

@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of WikiBundle
+ *
+ * (c) Christian Hoffmeister <choffmeister.github@googlemail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Thekwasti\WikiBundle\Renderer;
 
 use Thekwasti\WikiBundle\UrlGenerator;
@@ -26,6 +35,11 @@ use Thekwasti\WikiBundle\Tree\Headline;
 use Thekwasti\WikiBundle\Tree\Chain;
 use Thekwasti\WikiBundle\Tree\Text;
 
+/**
+ * XhtmlRenderer
+ * 
+ * @author Christian Hoffmeister <choffmeister.github@googlemail.com>
+ */
 class XhtmlRenderer implements RendererInterface
 {
     private $urlGenerator;
