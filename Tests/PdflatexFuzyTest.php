@@ -96,8 +96,9 @@ class PdflatexFuzyTest extends \PHPUnit_Framework_TestCase
         file_put_contents(sprintf('/tmp/%s.tex', $this->tempName), $latex);
         $process = new Process(sprintf('pdflatex %s.tex', $this->tempName), '/tmp');
         if ($process->run() != 0) {
-            file_put_contents(sprintf('/tmp/%s.fail', $this->tempName), $markup);
-            $this->fail(sprintf('pdflatex failed with random markup (saved in /tmp/%s.fail)', $this->tempName));
+            file_put_contents(sprintf('/tmp/%s.fail.md', $this->tempName), $markup);
+            file_put_contents(sprintf('/tmp/%s.fail.tex', $this->tempName), $latex);
+            $this->fail(sprintf('pdflatex failed with random markup (saved in /tmp/%s.fail.md)', $this->tempName));
         }
     }
     
