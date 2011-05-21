@@ -125,6 +125,13 @@ class NodeTests extends \PHPUnit_Framework_TestCase
         $copy = new Link();
         $copy->unserialize($link->serialize());
         $this->assertEquals($link, $copy);
+        
+        $link->setHasSpecialPresentation(true);
+        $this->assertEquals(true, $link->getHasSpecialPresentation());
+        
+        $copy = new Link();
+        $copy->unserialize($link->serialize());
+        $this->assertEquals($link, $copy);
     }
     
     public function testOrderedList()

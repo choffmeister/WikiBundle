@@ -39,13 +39,14 @@ class Link extends Node
     {
         return serialize(array(
             $this->destination,
+            $this->hasSpecialPresentation,
             parent::serialize()
         ));
     }
     
     public function unserialize($serialized)
     {
-        list($this->destination, $parent) = unserialize($serialized);
+        list($this->destination, $this->hasSpecialPresentation, $parent) = unserialize($serialized);
         parent::unserialize($parent);
     }
 }
