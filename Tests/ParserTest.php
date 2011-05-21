@@ -2,6 +2,8 @@
 
 namespace Thekwasti\WikiBundle\Tests;
 
+use Thekwasti\WikiBundle\Tree\LineBreak;
+
 use Thekwasti\WikiBundle\Parser;
 use Thekwasti\WikiBundle\Tree\TableRow;
 use Thekwasti\WikiBundle\Tree\TableCellHead;
@@ -57,26 +59,85 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         
         $doc = $parser->parse("foo\n\n\n\n\nfoo2");
         $this->assertEquals(new Document(array(new Paragraph(new Text('foo')), new Paragraph(new Text('foo2')))), $doc); 
+        
+        $doc = $parser->parse("foo\n*A");
+        $this->assertEquals(new Document(array(new Paragraph(array(new Text('foo'), new Text(' '))), new UnorderedList(1, new ListItem(new Text('A'))))), $doc); 
+
+        $doc = $parser->parse("foo\n##A");
+        $this->assertEquals(new Document(array(new Paragraph(array(new Text('foo'), new Text(' '))), new OrderedList(2, new ListItem(new Text('A'))))), $doc);
+        
+        $doc = $parser->parse("foo\n|=A");
+        $this->assertEquals(new Document(array(new Paragraph(array(new Text('foo'), new Text(' '))), new Table(new TableRow(new TableCellHead(new Text('A')))))), $doc); 
+
+        $doc = $parser->parse("foo\n{{{\nA");
+        $this->assertEquals(new Document(array(new Paragraph(array(new Text('foo'), new Text(' '))), new NoWiki(array(new Text("\n"), new Text('A'))))), $doc); 
     }
     
     public function testHeadline()
     {
         $parser = new Parser();
         
-        $doc = $parser->parse("= Headline\n\nFoo");
-        $this->assertEquals(new Document(array(new Headline(1, new Text(' Headline')), new Paragraph(new Text('Foo')))), $doc);
+        $doc = $parser->parse("= Headline");
+        $this->assertEquals(new Document(new Headline(1, 'Headline')), $doc);
         
-        $doc = $parser->parse("\n= Headline\n\nFoo");
-        $this->assertEquals(new Document(array(new Headline(1, new Text(' Headline')), new Paragraph(new Text('Foo')))), $doc);
+        $doc = $parser->parse("= Headline ");
+        $this->assertEquals(new Document(new Headline(1, 'Headline')), $doc);
+        
+        $doc = $parser->parse("= Headline\n\nFoo");
+        $this->assertEquals(new Document(array(new Headline(1, 'Headline'), new Paragraph(new Text('Foo')))), $doc);
+        
+        $doc = $parser->parse("\n=Headline\n\nFoo");
+        $this->assertEquals(new Document(array(new Headline(1, 'Headline'), new Paragraph(new Text('Foo')))), $doc);
         
         $doc = $parser->parse("\n\n= Headline\n\nFoo");
-        $this->assertEquals(new Document(array(new Headline(1, new Text(' Headline')), new Paragraph(new Text('Foo')))), $doc);
+        $this->assertEquals(new Document(array(new Headline(1, 'Headline'), new Paragraph(new Text('Foo')))), $doc);
         
         $doc = $parser->parse("=== Headline\n\nFoo");
-        $this->assertEquals(new Document(array(new Headline(3, new Text(' Headline')), new Paragraph(new Text('Foo')))), $doc);
+        $this->assertEquals(new Document(array(new Headline(3, 'Headline'), new Paragraph(new Text('Foo')))), $doc);
         
         $doc = $parser->parse("d=== Headline\n\nFoo");
         $this->assertEquals(new Document(array(new Paragraph(new Text('d=== Headline')), new Paragraph(new Text('Foo')))), $doc);
+        
+        $doc = $parser->parse("= Headline\nFoo");
+        $this->assertEquals(new Document(array(new Headline(1, 'Headline'), new Paragraph(new Text('Foo')))), $doc);
+        
+        $doc = $parser->parse("\n=Headline\nFoo");
+        $this->assertEquals(new Document(array(new Headline(1, 'Headline'), new Paragraph(new Text('Foo')))), $doc);
+        
+        $doc = $parser->parse("\n\n= Headline\nFoo");
+        $this->assertEquals(new Document(array(new Headline(1, 'Headline'), new Paragraph(new Text('Foo')))), $doc);
+        
+        $doc = $parser->parse("=== Headline\nFoo");
+        $this->assertEquals(new Document(array(new Headline(3, 'Headline'), new Paragraph(new Text('Foo')))), $doc);
+        
+        $doc = $parser->parse("d=== Headline\nFoo");
+        $this->assertEquals(new Document(array(new Paragraph(array(new Text('d=== Headline'), new Text(' '), new Text('Foo'))))), $doc);
+        
+        $doc = $parser->parse("=== Headline=");
+        $this->assertEquals(new Document(array(new Headline(3, 'Headline'))), $doc);
+        
+        $doc = $parser->parse("=== Headline ===\nFoo");
+        $this->assertEquals(new Document(array(new Headline(3, 'Headline'), new Paragraph(new Text('Foo')))), $doc);
+        
+        $doc = $parser->parse("=== Head=line ===\nFoo");
+        $this->assertEquals(new Document(array(new Headline(3, 'Head=line'), new Paragraph(new Text('Foo')))), $doc);
+    }
+    
+    public function testHeadlineBoldInterlaced()
+    {
+        $parser = new Parser();
+        
+        $doc = $parser->parse("= Hello //**fo");
+        $this->assertEquals(new Document(new Headline(1, 'Hello //**fo')), $doc);
+        
+        $doc = $parser->parse("== Hello //**fold**//\nTest");
+        $this->assertEquals(new Document(array(new Headline(2, 'Hello //**fold**//'), new Paragraph(new Text('Test')))), $doc);
+        
+        $doc = $parser->parse("=== Hello //**fold\nTest");
+        $this->assertEquals(new Document(array(new Headline(3, 'Hello //**fold'), new Paragraph(new Text('Test')))), $doc);
+
+        $doc = $parser->parse("== Hello //**fold\n\nTest");
+        $this->assertEquals(new Document(array(new Headline(2, 'Hello //**fold'), new Paragraph(new Text('Test')))), $doc);
     }
     
     public function testBold()
@@ -166,21 +227,6 @@ class ParserTest extends \PHPUnit_Framework_TestCase
             )),
             new Text('6'),
         ))), $doc);
-    }
-    
-    public function testHeadlineBoldInterlaced()
-    {
-        $parser = new Parser();
-        
-        $doc = $parser->parse("== Hello //**fold**//\nTest");
-        $this->assertEquals(new Document(array(new Headline(2, array(new Text(' Hello '), new Italic(new Bold(new Text('fold'))))), new Paragraph(new Text('Test')))), $doc);
-        
-        $doc = $parser->parse("== Hello //**fold\nTest");
-        $this->assertEquals(new Document(array(new Headline(2, array(new Text(' Hello '), new Italic(new Bold(new Text('fold'))))), new Paragraph(new Text('Test')))), $doc);
-
-        $doc = $parser->parse("== Hello //**fold\n\nTest");
-        $this->assertEquals(new Document(array(new Headline(2, array(new Text(' Hello '), new Italic(new Bold(new Text('fold'))))), new Paragraph(new Text('Test')))), $doc);
-        
     }
     
     public function testUnorderedList()
