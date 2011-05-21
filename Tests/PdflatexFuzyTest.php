@@ -10,10 +10,7 @@ use Symfony\Component\Process\Process;
 class PdflatexFuzyTest extends \PHPUnit_Framework_TestCase
 {
     protected $tempName;
-    protected $snippets;
-    protected $snippetCount;
-    protected $alphabet;
-    protected $alphabetSize;
+    protected $generator;
     
     protected function setUp()
     {
@@ -27,58 +24,34 @@ class PdflatexFuzyTest extends \PHPUnit_Framework_TestCase
     public function __construct()
     {
         $this->tempName = 'thekwasti_wikibundle_pdflatex_fuzy_test';
-        $this->alphabet = '';
-        for ($i = 0; $i < 0xD800; $i++)
-            $this->alphabet .= iconv('UCS-4LE', 'UTF-8', pack('V', $i));
-        for ($i = 0xE000; $i < 0xFFFF; $i++)
-            $this->alphabet .= iconv('UCS-4LE', 'UTF-8', pack('V', $i));
-            
-        $this->alphabet = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_.,#'\"+*-\n";
-        
-        $this->alphabetSize = strlen($this->alphabet);
-        $this->snippets = array(
-            "=",
-            "==",
-            "===",
-            "[[",
-            "]]",
-            "|",
-            "**",
-            "//",
-            "\n",
-            "\n\n",
-            "{{{",
-            "}}}",
-            "|",
-        );
-        $this->snippetCount = count($this->snippets);
+        $this->generator = new RandomMarkupGenerator();
     }
     
     public function testRandomMarkup1()
     {
         for ($i = 0; $i < 25; $i++) {
-            $this->assertPdfLatexSucceed($this->generateRandomMarkup());
+            $this->assertPdfLatexSucceed($this->generator->generateRandomMarkup());
         }
     }
     
     public function testRandomMarkup2()
     {
         for ($i = 0; $i < 25; $i++) {
-            $this->assertPdfLatexSucceed($this->generateRandomMarkup());
+            $this->assertPdfLatexSucceed($this->generator->generateRandomMarkup());
         }
     }
     
     public function testRandomMarkup3()
     {
         for ($i = 0; $i < 25; $i++) {
-            $this->assertPdfLatexSucceed($this->generateRandomMarkup());
+            $this->assertPdfLatexSucceed($this->generator->generateRandomMarkup());
         }
     }
     
     public function testRandomMarkup4()
     {
         for ($i = 0; $i < 25; $i++) {
-            $this->assertPdfLatexSucceed($this->generateRandomMarkup());
+            $this->assertPdfLatexSucceed($this->generator->generateRandomMarkup());
         }
     }
     
@@ -100,23 +73,5 @@ class PdflatexFuzyTest extends \PHPUnit_Framework_TestCase
             file_put_contents(sprintf('/tmp/%s.fail.tex', $this->tempName), $latex);
             $this->fail(sprintf('pdflatex failed with random markup (saved in /tmp/%s.fail.md)', $this->tempName));
         }
-    }
-    
-    protected function generateRandomMarkup()
-    {
-        $length = rand(0, 1000);
-        $markup = '';
-        
-        for ($i = 0; $i < $length; $i++) {
-            $c = rand(0,3);
-            
-            if ($c == 0) {
-                $markup .= $this->snippets[rand(0, $this->snippetCount - 1)];
-            } else {
-                $markup .= $this->alphabet[rand(0, $this->alphabetSize - 1)];
-            }
-        }
-        
-        return $markup;
     }
 }
