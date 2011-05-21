@@ -41,7 +41,9 @@ class DebugRenderer implements RendererInterface
         } else if ($element instanceof NodeInterface) {
             return str_repeat('    ', $depth) . substr(get_class($element), strlen('Thekwasti\WikiBundle\Tree') + 1) . "\n" . $this->renderRecursion($element->getChildren(), $depth + 1);
         } else {
+            // @codeCoverageIgnoreStart
             throw new \Exception(sprintf('Unsupported element of type %s', gettype($element) == 'object' ? get_class($element) : gettype($element)));
+            // @codeCoverageIgnoreEnd
         }
     }
 }
