@@ -34,6 +34,7 @@ use Thekwasti\WikiBundle\Tree\NodeInterface;
 use Thekwasti\WikiBundle\Tree\Headline;
 use Thekwasti\WikiBundle\Tree\Chain;
 use Thekwasti\WikiBundle\Tree\Text;
+use Thekwasti\WikiBundle\Tree\Breakline;
 
 /**
  * LatexRenderer
@@ -108,6 +109,8 @@ EOF;
             );
         } else if ($element instanceof HorizontalRule) {
             return "\n\\begin{center}\\rule{0.5\\textwidth}{0.5pt}\\end{center}\n";
+        } else if ($element instanceof Breakline) {
+            return ' ';
         } else if ($element instanceof Bold) {
             return sprintf('%s', $this->render($element->getChildren()));
         } else if ($element instanceof Italic) {

@@ -11,7 +11,7 @@
 
 namespace Thekwasti\WikiBundle;
 
-use Thekwasti\WikiBundle\Tree\LineBreak;
+use Thekwasti\WikiBundle\Tree\Breakline;
 use Thekwasti\WikiBundle\Tree\TableRow;
 use Thekwasti\WikiBundle\Tree\TableCellHead;
 use Thekwasti\WikiBundle\Tree\TableCell;
@@ -526,6 +526,10 @@ class Parser
         switch ($type) {
             case Lexer::T_NEWLINE:
                 $current->addChild(new Text(' '));
+                $i++;
+                break;
+            case Lexer::T_BREAKLINE:
+                $current->addChild(new Breakline());
                 $i++;
                 break;
             case Lexer::T_ESCAPER:

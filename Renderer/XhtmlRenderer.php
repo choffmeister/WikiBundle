@@ -34,6 +34,7 @@ use Thekwasti\WikiBundle\Tree\NodeInterface;
 use Thekwasti\WikiBundle\Tree\Headline;
 use Thekwasti\WikiBundle\Tree\Chain;
 use Thekwasti\WikiBundle\Tree\Text;
+use Thekwasti\WikiBundle\Tree\Breakline;
 
 /**
  * XhtmlRenderer
@@ -89,6 +90,8 @@ class XhtmlRenderer implements RendererInterface
             );
         } else if ($element instanceof HorizontalRule) {
             return "\n<hr/>\n";
+        } else if ($element instanceof Breakline) {
+            return "\n<br/>\n";
         } else if ($element instanceof Bold) {
             return sprintf('<strong>%s</strong>', $this->render($element->getChildren()));
         } else if ($element instanceof Italic) {

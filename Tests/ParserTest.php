@@ -2,8 +2,6 @@
 
 namespace Thekwasti\WikiBundle\Tests;
 
-use Thekwasti\WikiBundle\Tree\LineBreak;
-
 use Thekwasti\WikiBundle\Parser;
 use Thekwasti\WikiBundle\Tree\TableRow;
 use Thekwasti\WikiBundle\Tree\TableCellHead;
@@ -23,6 +21,7 @@ use Thekwasti\WikiBundle\Tree\Headline;
 use Thekwasti\WikiBundle\Tree\Text;
 use Thekwasti\WikiBundle\Tree\Document;
 use Thekwasti\WikiBundle\Tree\NodeInterface;
+use Thekwasti\WikiBundle\Tree\Breakline;
 
 class ParserTest extends \PHPUnit_Framework_TestCase
 {
@@ -572,6 +571,20 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $doc = $parser->parse("pre\n\n----\n\npost");
         
         $this->assertEquals(new Document(array(new Paragraph(array(new Text('pre'))), new HorizontalRule(), new Paragraph(new Text('post')))), $doc);
+    }
+    
+    public function testBreakline()
+    {
+        $parser = new Parser();
+        
+        $doc = $parser->parse("1\\\\2");
+        $this->assertEquals(new Document(new Paragraph(array(new Text('1'), new Breakline(), new Text('2')))), $doc);
+        
+        $doc = $parser->parse("\\\\2");
+        $this->assertEquals(new Document(new Paragraph(array(new Breakline(), new Text('2')))), $doc);
+        
+        $doc = $parser->parse("1\\\\");
+        $this->assertEquals(new Document(new Paragraph(array(new Text('1'), new Breakline()))), $doc);
     }
     
     public function testEscaping()

@@ -21,6 +21,7 @@ class Lexer
     const T_ESCAPER = 2;
     const T_NEWLINE = 10;
     const T_EMPTYLINE = 11;
+    const T_BREAKLINE = 12;
     const T_PIPE = 20;
     const T_HEADLINE = 51;
     const T_HORIZONTAL_RULE = 61;
@@ -40,6 +41,7 @@ class Lexer
         "\n{2,}",
         "\n",
         '~.',
+        '\\\\\\\\',
         '^=+',
         '^\*+',
         '^\#+',
@@ -95,6 +97,8 @@ class Lexer
             return self::T_EMPTYLINE;
         } else if (strlen($value) == 2 && $value[0] == '~') {
             return self::T_ESCAPER;
+        } else if ($value == "\\\\") {
+            return self::T_BREAKLINE;
         } else if ($isLineBeginning && $value[0] == '=') {
             return self::T_HEADLINE;
         } else if ($isLineBeginning && $value[0] == '*') {
