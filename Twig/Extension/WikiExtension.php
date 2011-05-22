@@ -12,7 +12,7 @@
 namespace Thekwasti\WikiBundle\Twig\Extension;
 
 use Thekwasti\WikiBundle\Parser;
-
+use Thekwasti\WikiBundle\Tree\Document;
 use Symfony\Component\DependencyInjection\Container;
 
 /**
@@ -40,8 +40,11 @@ class WikiExtension extends \Twig_Extension
     
     public function renderWikiPrecompiled($precompiled, $renderer = 'Xhtml')
     {
-        $doc = serialize($precompiled);
-        return $this->renderer[$renderer]->render($doc);
+        if (!$precompiled instanceof Document) {
+            $precompiled = serialize($precompiled);
+        }
+
+        return $this->renderer[$renderer]->render($precompiled);
     }
     
     public function getFunctions()
