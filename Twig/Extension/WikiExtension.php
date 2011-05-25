@@ -50,8 +50,8 @@ class WikiExtension extends \Twig_Extension
     public function getFunctions()
     {
         return array(
-            'wiki' => new \Twig_Function_Method($this, 'renderWiki'),
-        	'wiki_pc' => new \Twig_Function_Method($this, 'renderWikiPrecompiled'),
+            'wiki' => new \Twig_Function_Method($this, 'renderWiki', array('is_safe' => array('html'))),
+        	'wiki_pc' => new \Twig_Function_Method($this, 'renderWikiPrecompiled', array('is_safe' => array('html'))),
         );
     }    
     
