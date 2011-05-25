@@ -31,20 +31,20 @@ class WikiExtension extends \Twig_Extension
         $this->renderer = $renderer;
     }
     
-    public function renderWiki($markup, $renderer = 'Xhtml')
+    public function renderWiki($markup, $currentWiki = null, $renderer = 'Xhtml')
     {
         $parser = new Parser();
         $doc = $parser->parse($markup);
-        return $this->renderer[$renderer]->render($doc);
+        return $this->renderer[$renderer]->render($doc, $currentWiki);
     }
     
-    public function renderWikiPrecompiled($precompiled, $renderer = 'Xhtml')
+    public function renderWikiPrecompiled($precompiled, $currentWiki = null, $renderer = 'Xhtml')
     {
         if (!$precompiled instanceof Document) {
             $precompiled = serialize($precompiled);
         }
 
-        return $this->renderer[$renderer]->render($precompiled);
+        return $this->renderer[$renderer]->render($precompiled, $currentWiki);
     }
     
     public function getFunctions()
