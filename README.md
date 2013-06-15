@@ -1,6 +1,12 @@
 WikiBundle
 ==========
 
+Not maintained anymore
+----------------------
+
+I do not maintain this library anymore. If some wants to fork
+and proceed, no problem.
+
 What is WikiBundle?
 -------------------
 
